@@ -1,0 +1,160 @@
+:root{
+  --bg:#0b0f14;
+  --panel:#111826;
+  --panel2:#0f1521;
+  --text:#e8eef7;
+  --muted:#a9b4c7;
+  --border:#223049;
+  --good:#1b5e20;
+  --bad:#7f1d1d;
+  --primary:#2563eb;
+  --shadow: 0 10px 24px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--bg), #05070a);
+  color:var(--text);
+}
+a{color:inherit}
+.app-header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  background: rgba(11,15,20,.9);
+  backdrop-filter: blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.title .h1{font-size:18px;font-weight:700}
+.title .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.container{max-width:980px;margin:0 auto;padding:16px}
+.controls{
+  background:rgba(17,24,38,.6);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  box-shadow: var(--shadow);
+}
+.row{display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end}
+.field{display:flex; flex-direction:column; gap:6px; min-width:220px; flex:1}
+.field > span{font-size:12px;color:var(--muted)}
+.field input, .field select, .field textarea{
+  width:100%;
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background: rgba(15,21,33,.8);
+  color:var(--text);
+  outline:none;
+}
+.field textarea{resize:vertical}
+.field.checkbox{flex:0; min-width:auto; display:flex; flex-direction:row; align-items:center; gap:10px; padding-top:24px}
+.field.checkbox span{color:var(--text); font-size:14px}
+button{
+  border:1px solid var(--border);
+  background: rgba(15,21,33,.8);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:12px;
+  cursor:pointer;
+}
+button.primary{background: var(--primary); border-color: transparent; font-weight:700}
+button.ghost{background: transparent}
+button.good{background: rgba(27,94,32,.85); border-color: transparent; font-weight:700}
+button.bad{background: rgba(127,29,29,.85); border-color: transparent; font-weight:700}
+.icon-btn{padding:8px 10px; border-radius:12px; min-width:42px}
+label.file{position:relative; overflow:hidden}
+label.file input{position:absolute; inset:0; opacity:0; cursor:pointer}
+.stats{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.4}
+
+.card-area{margin-top:14px}
+.card{
+  width:100%;
+  min-height:260px;
+  perspective: 1200px;
+  background: transparent;
+}
+.card-inner{
+  position:relative;
+  width:100%;
+  min-height:260px;
+  transform-style: preserve-3d;
+  transition: transform .45s ease;
+}
+.card.flipped .card-inner{transform: rotateY(180deg)}
+.card-face{
+  position:absolute;
+  inset:0;
+  backface-visibility:hidden;
+  background: rgba(17,24,38,.65);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow: var(--shadow);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.card-back{transform: rotateY(180deg)}
+.meta{font-size:12px; color:var(--muted)}
+.content{font-size:18px; line-height:1.35; white-space:pre-wrap}
+.hint{margin-top:auto; font-size:12px; color:var(--muted)}
+.actions{display:flex; gap:12px; margin-top:12px; flex-wrap:wrap}
+.card-tools{
+  margin-top:12px;
+  background: rgba(17,24,38,.35);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+}
+.footer{
+  margin-top:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.browse{
+  margin-top:14px;
+  background: rgba(17,24,38,.6);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  box-shadow: var(--shadow);
+}
+.list{margin-top:10px; display:flex; flex-direction:column; gap:10px}
+.item{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px;
+  background: rgba(15,21,33,.6);
+}
+.item .q{font-weight:700}
+.item .a{margin-top:6px; color:var(--muted); white-space:pre-wrap}
+.item .meta{margin-top:8px}
+.small{color:var(--muted); font-size:12px; line-height:1.4}
+dialog::backdrop{background: rgba(0,0,0,.6)}
+.dialog{
+  width:min(560px, 92vw);
+  border:none;
+  border-radius:16px;
+  padding:14px;
+  background: rgba(17,24,38,.95);
+  color:var(--text);
+  box-shadow: var(--shadow);
+}
+.dialog-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
+.h2{font-size:16px; font-weight:800}
+
+@media (max-width:520px){
+  .content{font-size:16px}
+  .field{min-width:160px}
+}

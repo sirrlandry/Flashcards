@@ -1,0 +1,9 @@
+{
+  "name": "CAS Flashcards",
+  "short_name": "CAS Cards",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b0f14",
+  "theme_color": "#0b0f14",
+  "icons": []
+}

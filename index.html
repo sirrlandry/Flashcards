@@ -1,0 +1,2720 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CAS Flashcards</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="title">
+      <div class="h1">CAS Flashcards</div>
+      <div class="sub" id="subTitle">Offline, mobile-friendly review with spaced repetition</div>
+    </div>
+    <button class="icon-btn" id="btnSettings" aria-label="Settings">⚙︎</button>
+  </header>
+
+  <main class="container">
+    <section class="controls" id="controls">
+      <div class="row">
+        <label class="field">
+          <span>Deck</span>
+          <select id="deckSelect"></select>
+        </label>
+
+        <label class="field">
+          <span>Mode</span>
+          <select id="modeSelect">
+            <option value="due">Due (spaced repetition)</option>
+            <option value="all">All cards</option>
+            <option value="new">New cards only</option>
+            <option value="incorrect">Previously missed</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="field">
+          <span>Tag filter (optional)</span>
+          <input id="tagFilter" type="text" placeholder="e.g., credibility, triangles" />
+        </label>
+
+        <label class="field checkbox">
+          <input id="shuffleToggle" type="checkbox" />
+          <span>Shuffle queue</span>
+        </label>
+      </div>
+
+      <div class="row">
+        <button class="primary" id="btnStart">Start / Refresh</button>
+        <button class="ghost" id="btnBrowse">Browse</button>
+        <button class="ghost" id="btnExport">Export progress</button>
+        <label class="ghost file">
+          Import progress
+          <input id="importFile" type="file" accept="application/json" />
+        </label>
+      </div>
+
+      <div class="stats" id="stats"></div>
+    </section>
+
+    <section class="card-area" id="cardArea" hidden>
+      <div class="card" id="card" role="button" tabindex="0" aria-label="Flashcard (tap to flip)">
+        <div class="card-inner" id="cardInner">
+          <div class="card-face card-front">
+            <div class="meta" id="cardMeta"></div>
+            <div class="content" id="cardFront"></div>
+            <div class="hint">Tap to reveal answer</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="meta" id="cardMetaBack"></div>
+            <div class="content" id="cardBack"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" id="actions" hidden>
+        <button class="bad" id="btnWrong" aria-label="Incorrect">👎 Incorrect</button>
+        <button class="good" id="btnRight" aria-label="Correct">👍 Correct</button>
+        <button class="ghost" id="btnSkip">Skip</button>
+      </div>
+
+      <section class="card-tools" id="cardTools" hidden>
+        <div class="row">
+          <label class="field">
+            <span>Tags (comma-separated)</span>
+            <input id="cardTags" type="text" placeholder="e.g., triangles, exposures" />
+          </label>
+        </div>
+        <div class="row">
+          <label class="field">
+            <span>Notes (per card)</span>
+            <textarea id="cardNotes" rows="4" placeholder="Your personal mnemonic, clarification, or related formula..."></textarea>
+          </label>
+        </div>
+        <div class="row">
+          <button class="ghost" id="btnSaveNotes">Save tags/notes</button>
+        </div>
+      </section>
+
+      <div class="footer">
+        <div id="queueInfo"></div>
+        <button class="icon-btn" id="btnResetCard" title="Reset this card's progress">↺</button>
+      </div>
+    </section>
+
+    <section class="browse" id="browse" hidden>
+      <div class="row">
+        <input id="searchBox" type="search" placeholder="Search cards..." />
+        <button class="ghost" id="btnCloseBrowse">Close</button>
+      </div>
+      <div class="list" id="cardList"></div>
+    </section>
+  </main>
+
+  <dialog id="settingsDialog">
+    <form method="dialog" class="dialog">
+      <div class="dialog-header">
+        <div class="h2">Settings</div>
+        <button class="icon-btn" value="cancel" aria-label="Close">✕</button>
+      </div>
+
+      <label class="field">
+        <span>New card daily limit (applies in Due mode)</span>
+        <input id="newLimit" type="number" min="0" max="500" step="1" />
+      </label>
+
+      <label class="field">
+        <span>Base minutes for “Again” (incorrect) reviews</span>
+        <input id="againMinutes" type="number" min="1" max="1440" step="1" />
+      </label>
+
+      <label class="field">
+        <span>Base minutes for first “Good” on new card</span>
+        <input id="firstGoodMinutes" type="number" min="1" max="1440" step="1" />
+      </label>
+
+      <div class="row">
+        <button class="primary" value="ok" id="btnSaveSettings">Save</button>
+        <button class="ghost" value="cancel">Cancel</button>
+      </div>
+
+      <p class="small">
+        Data is stored locally in your browser (localStorage). Use Export/Import to back up or move to another device.
+      </p>
+    </form>
+  </dialog>
+
+
+  <script id="cards-data" type="application/json">
+{
+  "version": 1,
+  "generated_at": "2026-01-05T20:32:00.510318Z",
+  "decks": [
+    {
+      "id": "Ratemaking",
+      "name": "Ratemaking",
+      "card_count": 183
+    },
+    {
+      "id": "Reserving",
+      "name": "Reserving",
+      "card_count": 100
+    }
+  ],
+  "cards": [
+    {
+      "id": "Ratemaking-1",
+      "deck": "Ratemaking",
+      "card_number": 1,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "Definition of an exposure and an exposure base",
+      "back": "An exposure is the basic unit of risk underlying the insurance\npremium.\nThe definition of what an exposure represents varies by line\nofbusinessandsometimescoverageandiscalledanexposure\nbase.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-2",
+      "deck": "Ratemaking",
+      "card_number": 2,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "3 criteria for a good exposure base",
+      "back": "1. Proportional to expected loss: The exposure base chosen\nfor a line of business should be the risk characteristic\nthat exhibits the most directly proportional relationship to\nlosses.\n2. Practical: The exposure base should be objective, and easy\n& inexpensive to obtain and verify.\n3. Considerate of historical precedence: It is very costly for\nthe industry to change an existing exposure base because:\n• It can result in large premium swings for individual\ninsureds.\n• It requires changing the rating algorithm, which can be\ncostly from an IT standpoint.\n• It will require significant adjustments for future\nratemaking analyses.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-3",
+      "deck": "Ratemaking",
+      "card_number": 3,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "Definitions of written, earned, unearned, in-force",
+      "back": "1. Written Exposures/Premium: The total\nexposures/premium coming from policies issued during a\ngiven time period as of a certain point in time.\n2. Earned Exposures/Premium: The portion of written\nexposures/premium for which coverage has been provided\nas of a certain point in time. The insurer keeps this if the\npolicy is canceled.\n3. Unearned Exposures/Premium: The portion of written\nexposures/premium for which coverage has NOT been\nprovided as of a certain point in time.\n4. In-force Exposures/Premium: The number of insured\nunits/the amount of full-term premium, for all policies\nexposed to loss at a given point in time.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-4",
+      "deck": "Ratemaking",
+      "card_number": 4,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "2 ways to aggregate exposure metrics over time",
+      "back": "• Calendar year: This considers all policies during the year\nregardless of policy effective dates. Calendar year metrics\nare fixed once the year is over.\n• Policy year: This considers all policies with policy effective\ndates during the year. Policy year metrics can still change\nafter the year is over.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-5",
+      "deck": "Ratemaking",
+      "card_number": 5,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "Diagram of % earned for a 6-month auto policy",
+      "back": "Diagram of % earned for a 6-month auto policy effective 10/1/2014 by\ncalendar year\nCalYr2013 CalYr2014 CalYr2015\n0%\n1/1/13 1/1/14 1/1/15 1/1/16\ndenraE%\n100%\n50%",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-6",
+      "deck": "Ratemaking",
+      "card_number": 6,
+      "section": "A.3. Policy Data July 3,2018",
+      "front": "Diagram of % earned for a 6-month auto policy",
+      "back": "Diagram of % earned for a 6-month auto policy effective 10/1/2014 by policy\nyear\nPolYr2013 PolYr2014 PolYr2015\n0%\n1/1/13 1/1/14 1/1/15 1/1/16\ndenraE%\n100%\n50%",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-7",
+      "deck": "Ratemaking",
+      "card_number": 7,
+      "section": "A.3. Policy Data April 25,2014",
+      "front": "Formula Relation between written, earned, and",
+      "back": "Formula Relation between written, earned, and unearned\nCY Written = CY Earned + CY Change in Unearned\nPY Written = PY Earned + PY Unearned",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-8",
+      "deck": "Ratemaking",
+      "card_number": 8,
+      "section": "A.5. Claims Data April 25,2014",
+      "front": "4 ways to aggregate claims metrics over time",
+      "back": "• Calendar year (CY): This considers all transactions with\ntransaction dates during the year. Calendar year metrics are\nfixed once the year is over.\n• Accident year (AY): This considers all transactions as of a\ngiven valuation date on claims with an accident date during\nthe year.\n• Report year (RY): This considers all transactions as of a\ngiven valuation date on claims with a report date during\nthe year.\n• Policyyear(PY):Thisconsidersalltransactionsasofagiven\nvaluation date on claims coming from policies with a policy\neffective date during the year.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-9",
+      "deck": "Ratemaking",
+      "card_number": 9,
+      "section": "A.5. Claims Data April 25,2014",
+      "front": "Formula for reported losses",
+      "back": "Reported Losses = Paid Losses + Change in Case Reserves\nAlso known as case incurred losses.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-10",
+      "deck": "Ratemaking",
+      "card_number": 10,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Fundamental Insurance Equation",
+      "back": "Standard Economic Formula:\nPrice = Cost + Profit\nFundamental Insurance Equation:\nPremium = (Losses + LAE + UW Expenses) + UW Profit",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-11",
+      "deck": "Ratemaking",
+      "card_number": 11,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Total Profit for an Insurer",
+      "back": "Total Profit = UW Profit + Net Investment Income",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-12",
+      "deck": "Ratemaking",
+      "card_number": 12,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Ultimate Loss definition and components",
+      "back": "Ultimate Loss: The final amount required to close and settle\na claim or group of claims.\nUltimate losses have 3 components:\n1. Reported Losses, which equals paid losses + case reserves.\n2. Incurred But Not Reported (IBNR) Reserve: This is the\namount estimated to ultimately settle claims that have\noccurred, but have not yet been reported to the insurer.\n3. IncurredButNotEnoughReported(IBNER)Reserve: This\nis an estimate of the development of the Reported Losses for\nclaims that have been reported to the insurer.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-13",
+      "deck": "Ratemaking",
+      "card_number": 13,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Reason that fundamental insurance equation should",
+      "back": "Reason that fundamental insurance equation should be balanced at both\naggregate and individual levels\nAggregate balance ensures that the insurer stands to make its\noverall target UW profit.\nIndividual balance ensures that rates are fair for different\ncustomers. For example, a higher risk insured should pay\nhigher premiums than a lower risk insured.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-14",
+      "deck": "Ratemaking",
+      "card_number": 14,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Three main objectives in aggregating data by time",
+      "back": "1. Accurately matching premiums and exposures to losses.\n2. Using the most recent data available.\n3. Minimizing the cost of data collection and retrieval.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-15",
+      "deck": "Ratemaking",
+      "card_number": 15,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Calendar year definition with advantages and",
+      "back": "Calendar year definition with advantages and disadvantages\nThis method considers all policies and loss transactions\nduring the year. The main advantage of using calendar\nyear data is that there is no development, so results are\nfinal immediately after the year is over. Calendar year data\nis also readily available since it is required for financial\nreporting. The main disadvantage of using calendar year\ndata is that it provides a poor match in timing between\npremiums/exposures and losses.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-16",
+      "deck": "Ratemaking",
+      "card_number": 16,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Calendar/Accident year definition with advantages",
+      "back": "Calendar/Accident year definition with advantages and disadvantages\nThis method combines calendar year premium and exposure\ndata with accident year claims data. This is the most\ncommonly used method in ratemaking and reserving\nanalyses. This method presents a better match in timing\nof premiums/exposures and losses than calendar year.\nHowever, future development must be estimated since\naccident year losses can develop over time.\nUsing accident year loss data is also preferable when you\nwant to isolate major claim events such as catastrophes.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-17",
+      "deck": "Ratemaking",
+      "card_number": 17,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Accident year definition with advantages and",
+      "back": "Accident year definition with advantages and disadvantages\nThis is a slight modification of calendar/accident year, with\nthe only difference being that premium audits taking place\nafter the calendar year is over are incorporated into the\npremium and exposure data. As a result, the premium\nand exposure data is subject to development and must be\nestimated in addition to the loss data. However, it does\nprovide a truer match of premiums/exposures to losses than\ncalendar/accident year.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-18",
+      "deck": "Ratemaking",
+      "card_number": 18,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Policy year definition with advantages and",
+      "back": "Policy year definition with advantages and disadvantages\nThis method considers all premiums, exposures, and losses\nfrom policies with effective dates during the year. The main\nadvantage of using policy year data is that it provides a true\nmatch between premiums/exposures and losses. The main\ndisadvantage is that policy year data takes longer to develop\nthan accident year data. Reinsurers also use Underwriting\nYear, which is similar to policy year but it is based on the\nyear that the reinsurance policy became effective.\nUsing policy year data is also preferable when you want to\nisolate policy or underwriting changes, such as a change in\npolicy limits or deductibles being written.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-19",
+      "deck": "Ratemaking",
+      "card_number": 19,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Report year definition with advantages and",
+      "back": "Report year definition with advantages and disadvantages\nThis method groups loss data based on the date that claims\nare reported. This is used primarily for claims-made policies,\nwhich provide coverage based on the date the claim is\nreported instead of the accident date. An advantage of report\nyear data is that the number of claims is known at the end\nof the year. A disadvantage is that report year is useful in\nestimating IBNER, but not as useful in estimating IBNR.\nUsing report year data is also preferable when you want to\nisolate changes in claims practices, such as case reserving\nadequacy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-20",
+      "deck": "Ratemaking",
+      "card_number": 20,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "4 things to review for dataset reliability",
+      "back": "• Consistency with financial statement data: How close is\nthe match?\n• Consistency with data from prior analyses: How close is\nthe match?\n• Data reasonableness: Do values make sense?\n• Data definitions: Do you know what each data field\nrepresents?",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-21",
+      "deck": "Ratemaking",
+      "card_number": 21,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Types of external data sources",
+      "back": "1. Statistical plans: These plans aggregate data across\ncompanies and produce analyses or rates that companies\ncan use. Examples are NCCI and ISO.\n2. Other aggregated industry data: An example is the Fast\nTrack Monitoring system, which creates reports on industry\nlevel loss trends.\n3. Competitor rate filings & manuals: These may be obtained\nfrom public records at state insurance departments. These\ncan be used by an insurer in setting their own rates.\n4. Other 3rd party data: This might include economic or\ngeo-demographic data. For example, Consumer Price\nIndices (CPIs) for things like medical costs can be used to\nbetter understand inflation in an insurer’s own loss data.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-22",
+      "deck": "Ratemaking",
+      "card_number": 22,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Why caution should be taken in using external data",
+      "back": "When using external data, significant caution needs to be\ntaken in understanding whether the data is relevant or\ncomparable for the insurer. Data may be different for different\ninsurance companies because of differences in products\noffered, coverage definitions, underwriting criteria, expense\nlevels, claims practices, claims coding, mix of business, etc.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-23",
+      "deck": "Ratemaking",
+      "card_number": 23,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Frequency formula and use",
+      "back": "NumberofClaims\nFrequency =\nNumberofExposures\nThe most common scenario is to use earned exposures in the\ndenominator and reported or ultimate claim counts in the\nnumerator.\nChanges in frequency can help identify trends in claims\noccurrence and insurance utilization as well as measure the\neffectivenessofunderwritingchanges. Asanexample, during\nperiods of significantly high gas prices, frequency tends to\ndecreaseformostpersonalautocoveragesaspeopledriveless\nand thus get into less accidents.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-24",
+      "deck": "Ratemaking",
+      "card_number": 24,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Severity formula and use",
+      "back": "Losses\nSeverity =\nNumberofClaims\nSeverity is often calculated many different ways in practice,\nand the differences may help build an understanding of\nchanges in the loss portfolio. Furthermore, ALAE may or\nmay not be included in severity measures with Losses.\nChangesininflationorclaimshandlingproceduresmayshow\nup as changes in claim severity over time.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-25",
+      "deck": "Ratemaking",
+      "card_number": 25,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Pure Premium formula and use",
+      "back": "Pure Premium = Losses = Frequency × Severity\nNumberofExposures\nThe most common scenario is to use earned exposures in\nthe denominator and reported or ultimate losses in the\nnumerator.\nPure Premium measures frequency and severity changes\ncombined.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-26",
+      "deck": "Ratemaking",
+      "card_number": 26,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Average Premium formula and use",
+      "back": "Premium\nAverage Premium =\nNumberofExposures\nThe numerator and denominator for average premium\nshould be on the same basis (written, earned, unearned, or\nin-force).\nAverage premium changes come from both rate changes\nmade by the insurer and changes in the mix of business\nwritten. For example, if an auto insurer gives a discount to\nmarried drivers, and a higher percent of insureds are getting\nmarried over time, then a higher percent of insureds will get\nthe discount and the average premium will decrease over\ntime.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-27",
+      "deck": "Ratemaking",
+      "card_number": 27,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Loss Ratio formula and use",
+      "back": "Loss Ratio = Losses = PurePremium\nPremium AveragePremium\nThe most common scenario is to use earned premium in\nthe denominator and reported or ultimate losses in the\nnumerator.\nThis is the primary measure that insurers look at to monitor\ntheir rate adequacy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-28",
+      "deck": "Ratemaking",
+      "card_number": 28,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "LAE Ratio formula and use",
+      "back": "LAE\nLAE Ratio =\nLosses\nNote that in practice the term “LAE Ratio” may also be used\nas LAE divided by Premium, so it is important to clarify\nwhich denominator is being used.\nThis ratio is used to monitor claims department costs.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-29",
+      "deck": "Ratemaking",
+      "card_number": 29,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "UW Expense Ratio formula and use",
+      "back": "UWExpenses\nUW Expense Ratio =\nPremium\nUsually, insurers will compare the underwriting expenses\nthat are incurred atthe start of policy terms (i.e., commissions,\npremium taxes, etc.) to written premium and expenses that\nare incurred over the life of the policy to earned premium. In\nthese cases, the UW Expense Ratio is:\nCommissionsandbrokerage+Otheracquisition+Taxes,licenses,andfees\nWrittenPremium\n+\nGeneralexpenses\nEarnedPremium\nThis ratio is used to monitor underwriting expense costs.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-30",
+      "deck": "Ratemaking",
+      "card_number": 30,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Operating Expense Ratio formula",
+      "back": "LAE\nOER = UW Expense Ratio +\nEarnedPremium",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-31",
+      "deck": "Ratemaking",
+      "card_number": 31,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Combined Ratio formula and use",
+      "back": "Combined Ratio = Loss Ratio + LAE + UWExpenses\nEarnedPremium WrittenPremium\nFor companies that relate general expenses to earned\npremium, the formula becomes:\nCombined Ratio = Loss Ratio + Operating Expense Ratio\nThe combined ratio is the most common measure of\noverall underwriting profit for insurers. If you divide the\nfundamental insurance equation by premium, you can see\nthat UW Profit as a percentage of Premium is equal to 1 -\nCombined Ratio.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-32",
+      "deck": "Ratemaking",
+      "card_number": 32,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Retention Ratio formula and use",
+      "back": "NumberofPoliciesRenewed\nRetention Ratio =\nNumberofPotentialRenewalPolicies\nHow this is measured in practice varies across companies.\nFor example, some insurers omit policies that are canceled by\nthe insurer.\nRetention ratios are monitored as a competitiveness measure,\nand are watched closely after rate changes or significant\nchanges in service by an insurer. They are also used in\nprojecting future premiums.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-33",
+      "deck": "Ratemaking",
+      "card_number": 33,
+      "section": "A.7. Insurer Performance&Profit April 25,2014",
+      "front": "Close Ratio formula and use",
+      "back": "NumberofAcceptedQuotes\nClose Ratio =\nNumberofQuotes\nHow this is measured in practice varies across companies.\nFor example, some insurers may count multiple quote\niterations for the same customer as one quote.\nClose ratios are used as a competitiveness measure.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-34",
+      "deck": "Ratemaking",
+      "card_number": 34,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Shock loss Examples",
+      "back": "Examples of shock losses could be a major auto accident\ninvolving multiple claimants for auto insurance, a total\nloss on a large home for homeowners insurance, or a\npermanent disability injury of a young worker for workers’\ncompensation insurance.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-35",
+      "deck": "Ratemaking",
+      "card_number": 35,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Why shock loss definition might vary by insurer",
+      "back": "One reason is related to the size of the book of business. For\nexample, a $1,000,000 loss would have a very large impact\non the profitability of a book of business with $10,000,000 in\nannual premium, but less of an impact on a book of business\nwith $1,000,000,000 in annual premium.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-36",
+      "deck": "Ratemaking",
+      "card_number": 36,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "What happens to future losses when you don’t",
+      "back": "What happens to future losses when you don’t smooth out shock losses or\ncatastrophe losses\nIf you don’t adjust for shock losses or catastrophes in your\nhistorical loss data, you will overestimate future losses when\nthese events are in your dataset, and underestimate future\nlosses when the events do not occur in your dataset.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-37",
+      "deck": "Ratemaking",
+      "card_number": 37,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Ways to adjust data for shock losses",
+      "back": "1. Cap losses at basic limits\n2. Cap losses and apply an excess loss loading\n3. Remove ground-up shock losses and apply a shock loss\nloading",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-38",
+      "deck": "Ratemaking",
+      "card_number": 38,
+      "section": "B.2. Large Events&Anomalies November 12,2019",
+      "front": "Common choices for a level to cap shock losses",
+      "back": "• Using actuarial judgment: Consider amount above which\nlosses become volatile.\n• A percentile of the size of loss distribution: For example,\nsort all claims in increasing order by size, and cap all losses\nat the 99th percentile loss amount.\n• Loss as a percent of the insured value: This is most\ncommoninhomeownersorcommercialpropertyinsurance.\nFor example, you might cap all losses at 98% of the insured\nvalue, so if a home was insured for $500k, you would cap\nany losses for that home at $490k.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-39",
+      "deck": "Ratemaking",
+      "card_number": 39,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Goal in deciding number of years to use for excess",
+      "back": "Goal in deciding number of years to use for excess loss load or non-modeled\ncatastrophe load\nBalancing the stability of the long-term average and its\nresponsiveness to changes.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-40",
+      "deck": "Ratemaking",
+      "card_number": 40,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Ways to account for changes in severity for excess loss",
+      "back": "Ways to account for changes in severity for excess loss loads\n1. Using a cap level based on the future policy period cost\nlevels, and trending historical losses to this cost level.\nYou then calculate the ratio of trended excess losses to\nnon-excess trended losses.\n2. Indexing the cap level to reflect the changing cost levels, so\nthe cap level varies for each year.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-41",
+      "deck": "Ratemaking",
+      "card_number": 41,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Why catastrophe loads are often split into modeled",
+      "back": "Why catastrophe loads are often split into modeled and non-modeled\ncomponents\nNon-modeled catastrophe losses are frequent enough that\na long term average provides enough data for a reliable\nestimate.\nCatastrophe models are used to estimate losses from events\nlike earthquakes or hurricanes, where even a longer term\naverage doesn’t have enough data to provide a reliable\nestimate.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-42",
+      "deck": "Ratemaking",
+      "card_number": 42,
+      "section": "B.2. Large Events&Anomalies April 25,2014",
+      "front": "Some non-pricing measures to mitigate catastrophe",
+      "back": "Some non-pricing measures to mitigate catastrophe exposure for an insurer\nRestricting writings in high risk areas, requiring higher\ndeductibles in high risk areas, and purchasing reinsurance.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-43",
+      "deck": "Ratemaking",
+      "card_number": 43,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Why adjust for one-time changes in ratemaking?",
+      "back": "So that the data is most representative of the future policy\nperiod being priced. Not making these adjustments might\nlead to excessive or inadequate rates.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-44",
+      "deck": "Ratemaking",
+      "card_number": 44,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Types of effects for one-time changes",
+      "back": "Direct effects are the direct and obvious impacts to\npremiums, losses, or expenses resulting from the change, all\nelse being equal.\nIndirect effects are the impacts to premiums, losses,\nor expenses from changes in human behavior that are\nconsequences of the one-time change.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-45",
+      "deck": "Ratemaking",
+      "card_number": 45,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Why direct effects of coverage increases on losses are",
+      "back": "Why direct effects of coverage increases on losses are difficult to quantify\nHistorical losses may have been capped at lower levels of\ncoverage, or a coverage may not have existed historically.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-46",
+      "deck": "Ratemaking",
+      "card_number": 46,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "3 ways to calculate the direct effect of a coverage",
+      "back": "3 ways to calculate the direct effect of a coverage change on losses\n1. Restate individual claims at new coverage levels: This is\nthe preferred method, but it requires historical individual\nclaim data.\n2. Calculate the effect on representative groups of claims:\nUse a weighted average of the impact of the change on\ndifferent segments.\n3. Simulate losses under new coverage levels: A simulation\ncan be run to try and quantify losses under the new\ncoverage levels, though the parameters of the simulation\nmay be difficult to choose.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-47",
+      "deck": "Ratemaking",
+      "card_number": 47,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "2 methods to on-level premiums",
+      "back": "1. Extension of Exposures: This method re-rates all historical\npolicies at the individual policy level using the newest\nrates, and then re-calculates the earned premiums for each\nhistorical period using the newest rates.\n2. Parallelogram method: This method is used on grouped\npolicy data, and adjusts the historical premium by an\naverage factor for each historical period.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-48",
+      "deck": "Ratemaking",
+      "card_number": 48,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Advantages and disadvantages of Extension of",
+      "back": "Advantages and disadvantages of Extension of Exposures method\nThe advantage is that it is the most accurate method. The\nchallenges include getting the detailed data, the computing\npower this may require, the need to make assumptions for\nnew rating variables with no historical data, and it may be\ndifficult to incorporate changes in schedule rating guidelines\nfor commercial lines of business.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-49",
+      "deck": "Ratemaking",
+      "card_number": 49,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Advantages and disadvantages of Parallelogram",
+      "back": "Advantages and disadvantages of Parallelogram method\nThe advantage is that it is quicker to calculate. The\ndisadvantages are that it assumes policies are written evenly\nthroughout the historical period, and that aggregate on-level\nfactors produced by this method may not be appropriate for\nclass level ratemaking.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-50",
+      "deck": "Ratemaking",
+      "card_number": 50,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Ways to correct for uneven writings with",
+      "back": "Ways to correct for uneven writings with parallelogram method\nUse shorter time periods (e.g., quarters instead of years) to\nreduce the inaccuracy.\nA more accurate way is to aggregate historical data by rate\nlevel.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-51",
+      "deck": "Ratemaking",
+      "card_number": 51,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Parallelogram method assumption for Losses",
+      "back": "That losses are uniformly distributed over the historical\nperiod being used.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-52",
+      "deck": "Ratemaking",
+      "card_number": 52,
+      "section": "B.3. One-time Changes April 25,2014",
+      "front": "Two ways that a benefit change can apply to losses",
+      "back": "1. To all losses on policies written after a certain date.\nThis is analogous to the slanted rate change lines in the\nparallelogram method.\n2. To all new losses occurring after a certain date. This\nis analogous to the vertical law change lines in the\nparallelogram method.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-53",
+      "deck": "Ratemaking",
+      "card_number": 53,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Reason for adjusting for continuous changes",
+      "back": "To ensure that historical data reflects the mix of business and\nlevels of social and economic inflation expected in the future\nperiod.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-54",
+      "deck": "Ratemaking",
+      "card_number": 54,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Possible data sources for trends",
+      "back": "• Historical insurer data\n• Industry data\n• Economic data",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-55",
+      "deck": "Ratemaking",
+      "card_number": 55,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Data adjustments before trending",
+      "back": "Adjust for large events & anomalies, one-time changes, and\nseasonality.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-56",
+      "deck": "Ratemaking",
+      "card_number": 56,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Advantage/Disadvantage of using written premium",
+      "back": "Advantage/Disadvantage of using written premium to determine premium\ntrends\nThe advantage of using average earned premium to\ndetermine the trend is that we are trending earned premium,\nso it makes sense to determine the trend on earned premium.\nThe advantage of using written premium is that WP is a\nleading indicator of changes to EP, as changes in average WP\nwill ultimately show up as changes in average EP.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-57",
+      "deck": "Ratemaking",
+      "card_number": 57,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Why frequency and severity are typically analyzed",
+      "back": "Why frequency and severity are typically analyzed separately\nSince they can change for different reasons, and combining\nthem might make the changes less apparent.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-58",
+      "deck": "Ratemaking",
+      "card_number": 58,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Advantage/Disadvantage of using calendar period",
+      "back": "Advantage/Disadvantage of using calendar period data to determine loss\ntrends\nThe advantage of using calendar period data is that you don’t\nneed to estimate ultimate losses, which are uncertain.\nThe advantage of using accident year ultimate loss data is that\nit provides a better match between losses and exposures.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-59",
+      "deck": "Ratemaking",
+      "card_number": 59,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Advantage/Disadvantage of using paid loss data",
+      "back": "Advantage/Disadvantage of using paid loss data compared to reported loss\ndata to determine loss trends\nThe advantage of using paid loss data is that it is not subject\nto changes in case reserving practices.\nThe advantage of using reported loss data is that it\nincorporates more recent information, since case reserves\nprovide information you might expect to eventually see in\npaid data.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-60",
+      "deck": "Ratemaking",
+      "card_number": 60,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Two other alternative methods for loss trends",
+      "back": "1. Using econometric or generalized linear models\n2. Using incremental calendar year data by accident year",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-61",
+      "deck": "Ratemaking",
+      "card_number": 61,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Three ways to calculate a trend from historical data",
+      "back": "1. Take an average of the percent changes.\n2. Fit a line to the data: This assumes a constant change for\neach time period.\n3. Fit an exponential curve to the data: This assumes a\nconstant percent change between each time period.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-62",
+      "deck": "Ratemaking",
+      "card_number": 62,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Two reasons why excess severity trends are greater",
+      "back": "Two reasons why excess severity trends are greater than basic or total limits\ntrends\n1. For losses above the basic limits, the trend is entirely in the\nexcess layer.\n2. Losses just under the basic limit are pushed into the excess\nlayer by the trend, creating new losses for the excess layer.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-63",
+      "deck": "Ratemaking",
+      "card_number": 63,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Two assumptions commonly made in determining",
+      "back": "Two assumptions commonly made in determining trend periods\n1. Policies are written uniformly over time.\n2. Premiums are earned uniformly and losses occur uniformly\nover the policy period.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-64",
+      "deck": "Ratemaking",
+      "card_number": 64,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Information needed to determine the average earned",
+      "back": "Information needed to determine the average earned date of a future policy\nperiod\n1. Future rate change effective date\n2. Length of time rates are expected to be in effect\n3. Policy term length",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-65",
+      "deck": "Ratemaking",
+      "card_number": 65,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Two ways to perform the first step of a two-step trend",
+      "back": "1. Adjust the historical period level to be equal to the latest\nlevel: This assumes the latest level is a reliable number\nfrom which to base the future forecast. This is more\ncommon for premium trends since they have less random\nfluctuation than loss trends. For example, if you use written\npremium trends to forecast earned premium, the current\ntrend factor is:\nLatestAverageWPatCurrent\nCurrent trend factor =\nHistoricalAverageEPatCurrent\n2. Trend the historical period level to the latest time period:\nThis is performed like a one-step trend, and is more\ncommon for loss trends.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-66",
+      "deck": "Ratemaking",
+      "card_number": 66,
+      "section": "B.4. Continuous Changes July 11,2019",
+      "front": "Overlap fallacy between development and trending",
+      "back": "Development brings the data from each historical period to\nits ultimate level, while trending reflects the difference in\nultimate levels from one historical period to the next. In\nratemaking terms for losses, loss development makes sure\nthat the future policy is priced to cover ultimate losses, while\nloss trend makes sure that the ultimate losses are at the cost\nlevels corresponding to the future policy period. Historical\nlosses are trended from the average accident date of the\nhistorical period to the average accident date of the future\nperiod, and loss development takes losses from the average\naccident date of the future period to their ultimate level.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-67",
+      "deck": "Ratemaking",
+      "card_number": 67,
+      "section": "B.5. Development April 25,2014",
+      "front": "Reason to develop losses in ratemaking",
+      "back": "So that rates in the future policy period will be adequate to\ncover the ultimate costs coming from policies written using\nthose rates.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-68",
+      "deck": "Ratemaking",
+      "card_number": 68,
+      "section": "B.5. Development April 25,2014",
+      "front": "Four steps in estimating ultimates",
+      "back": "1. Exploratory analysis of the data: Identify key\ncharacteristics and anomalies, and balance to verified\nsources.\n2. Apply appropriate techniques to estimate ultimates\n3. Evaluate the conflicting results of the different\ntechniques: Reconcile and explain the different outcomes.\n4. Monitor projections of actual versus expected\ndevelopment: Update or correct projections with new\ninformation.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-69",
+      "deck": "Ratemaking",
+      "card_number": 69,
+      "section": "B.5. Development April 25,2014",
+      "front": "Areas in estimating ultimates for which actuarial",
+      "back": "Areas in estimating ultimates for which actuarial judgment is needed\n• Determining the optimal combinations of claims to use (i.e.,\nthe granularity)\n• Assessing the effect of an insurer’s operational changes on\nthe data\n• Adjusting data for known and quantifiable events\n• Evaluating the strengths and weaknesses of different\nestimation methods\n• Making the final selection of the estimated ultimate",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-70",
+      "deck": "Ratemaking",
+      "card_number": 70,
+      "section": "B.5. Development April 25,2014",
+      "front": "What changes a closed claim counts as a % of",
+      "back": "What changes a closed claim counts as a % of reported claim counts triangle\ncan show\nWhether there has been a speedup or slowdown in closing\nclaims over time.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-71",
+      "deck": "Ratemaking",
+      "card_number": 71,
+      "section": "B.5. Development April 25,2014",
+      "front": "What changes an average paid on closed claims",
+      "back": "What changes an average paid on closed claims triangle can show\nThis can reflect both severity trends and speedups or\nslowdowns in the closing of small claims relative to large\nclaims.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-72",
+      "deck": "Ratemaking",
+      "card_number": 72,
+      "section": "B.5. Development April 25,2014",
+      "front": "What changes an average case reserve triangle can",
+      "back": "What changes an average case reserve triangle can show\nThis will reflect severity trends, speedups or slowdowns\nin the closing of small claims relative to large claims, and\nchanges in case reserve adequacy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-73",
+      "deck": "Ratemaking",
+      "card_number": 73,
+      "section": "B.5. Development April 25,2014",
+      "front": "What changes a paid loss to reported loss triangle can",
+      "back": "What changes a paid loss to reported loss triangle can show\nThis will reflect speedups or slowdowns in the closing of\nclaims and changes in case reserve adequacy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-74",
+      "deck": "Ratemaking",
+      "card_number": 74,
+      "section": "B.5. Development April 25,2014",
+      "front": "Key characteristics to use in deciding triangle",
+      "back": "Key characteristics to use in deciding triangle granularity\n• Similarity in coverage (i.e., similar laws, policy terms)\n• Volume of claim counts (i.e., credibility)\n• Reliability of case reserves\n• Report lag\n• Settlement lag\n• Likelihood of claims reopening\n• Claim severity",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-75",
+      "deck": "Ratemaking",
+      "card_number": 75,
+      "section": "B.5. Development April 25,2014",
+      "front": "Reasons that losses can develop downwards",
+      "back": "Reasons for negative loss development include case reserve\ndecreases, deductible recoveries, subrogation, and salvage.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-76",
+      "deck": "Ratemaking",
+      "card_number": 76,
+      "section": "B.5. Development April 25,2014",
+      "front": "Possible selections for age-to-age factors",
+      "back": "• Straight average: Straight average of the LDFs.\n• Weighted average: Weight the LDFs by the earlier age\nlosses. It is faster though to sum the relevant values from\nthe 2 columns of the original loss triangle and then divide.\n• Geometric average: Multiply N LDFs then take the Nth\nroot.\n• Medialaverage: ThrowoutthehighestandlowestLDFand\nstraight average the rest.\n• Judgment\n• Latest year\n• Industry benchmark factors",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-77",
+      "deck": "Ratemaking",
+      "card_number": 77,
+      "section": "B.5. Development April 25,2014",
+      "front": "Characteristics actuaries look at when selecting",
+      "back": "Characteristics actuaries look at when selecting age-to-age factors\n• Smooth progression of age-to-age factors across columns:\nIdeally, these factors should steadily decrease with age.\n• Stability of age-to-age factors for the same column: The\nmorestability, themoreconsistent thedevelopmentpattern.\nUsually the first ages have less stability since the data is\nimmature.\n• Credibility of experience: If you have limited or unstable\ndata, you can use industry benchmark factors.\n• Changes in patterns: Systematic patterns can identify\nchanges in operations or environment.\n• Applicability of historical experience: Do you expect the\nfuture development to be like the past development?",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-78",
+      "deck": "Ratemaking",
+      "card_number": 78,
+      "section": "B.5. Development April 25,2014",
+      "front": "Impact on future estimates based on the reported",
+      "back": "Impact on future estimates based on the reported chain ladder method with a\nrecent decrease in case reserve adequacy\nIf case reserve adequacy has recently decreased, historical\nage-to-age factors would be based on higher case reserve\nadequacy. Using those age-to-age factors to project recent\ndata (that has lower case adequacy) would cause you to\nunderproject ultimate losses.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-79",
+      "deck": "Ratemaking",
+      "card_number": 79,
+      "section": "B.5. Development April 25,2014",
+      "front": "Impact on future estimates based on the paid chain",
+      "back": "Impact on future estimates based on the paid chain ladder method with a\nrecent increase in claim settlement rates\nIf claim settlement rates have recently increased, historical\nage-to-age factors would be based on slower settlement rates.\nUsing those age-to-age factors to project recent data would\ncause you to overproject ultimate losses.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-80",
+      "deck": "Ratemaking",
+      "card_number": 80,
+      "section": "B.5. Development April 25,2014",
+      "front": "Common methods for selecting a tail factor",
+      "back": "• Doing a special study that contains more years of data.\n• Using an industry benchmark tail factor.\n• Fitting a curve (e.g., exponential decay) to the LDFs and\nextrapolating the tail factor.\n• Use reported-to-paid ratios at the latest paid development\nperiod.\n• Judgment (e.g., arbitrarily picking a value like 1.05).",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-81",
+      "deck": "Ratemaking",
+      "card_number": 81,
+      "section": "B.5. Development April 25,2014",
+      "front": "Formulas for ultimate, IBNR, and unpaid claims",
+      "back": "Formulas for ultimate, IBNR, and unpaid claims estimates\nUltimate = Latest value × age-to-ultimate factor\nIBNR = Ultimate - Latest reported loss\nUnpaid = Ultimate - latest paid loss",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-82",
+      "deck": "Ratemaking",
+      "card_number": 82,
+      "section": "B.5. Development April 25,2014",
+      "front": "Impact of a large loss in a cumulative triangle on",
+      "back": "Impact of a large loss in a cumulative triangle on age-to-age factors\nSpike when the loss appears, followed by a drop.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-83",
+      "deck": "Ratemaking",
+      "card_number": 83,
+      "section": "B.5. Development April 25,2014",
+      "front": "Do triangles need to be adjusted for one-time",
+      "back": "Do triangles need to be adjusted for one-time changes?\nUsually not, as changes can be isolated to appear on separate\nrows if needed.\nHowever, triangles do need to be adjusted for law changes\nthat impact open claims or in-force policies. This can be done\nbyon-leveling, orconsideringtheimpactofthechangeswhen\nselecting LDFs.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-84",
+      "deck": "Ratemaking",
+      "card_number": 84,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "2 ways to incorporate ALAE in indications",
+      "back": "1. Included with loss: Add loss and ALAE and treat as 1\namount.\n2. Analyzed separately: This is done if ALAE is large as\nin some commercial lines. ALAE is then developed and\ntrended separately from loss.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-85",
+      "deck": "Ratemaking",
+      "card_number": 85,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Pure Premium Method Formula",
+      "back": "PurePremincl. LAE+FixedExpenseperExposure\nIndicated Prem =\n1−V−Q\nT",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-86",
+      "deck": "Ratemaking",
+      "card_number": 86,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Loss Ratio Method Formula",
+      "back": "LossandLAERatio+FixedExpenseRatio\nIndicated Change = - 1\n1−V−Q\nT",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-87",
+      "deck": "Ratemaking",
+      "card_number": 87,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "3 methods to incorporate UW expenses in pricing",
+      "back": "1. All Variable Expense Method: Treat all UW expenses as\nvariable to premium. This assumes future expense ratios\nwill be consistent with historical expense ratios.\n2. Premium-Based Projection Method: This assumes future\nexpense ratios will be consistent with historical expense\nratios, but separately calculates fixed and variable expense\nratios.\n3. Exposure/Policy-based Projection Method: In this method\nyou divide fixed expenses by exposures (or policy counts),\nand divide variable expenses by premium (as in the other\nmethods).",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-88",
+      "deck": "Ratemaking",
+      "card_number": 88,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Which expense categories relate to written vs earned",
+      "back": "Which expense categories relate to written vs earned premium\nOther Acquisition: Written Premium\nCommissions & Brokerage: Written Premium\nTaxes, Licenses, & Fees: Written Premium\nGeneral Expenses: Earned Premium",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-89",
+      "deck": "Ratemaking",
+      "card_number": 89,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Which expense categories generally use state vs",
+      "back": "Which expense categories generally use state vs countrywide data\nOther Acquisition: Countrywide\nGeneral Expenses: Countrywide\nCommissions & Brokerage: State\nTaxes, Licenses, & Fees: State",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-90",
+      "deck": "Ratemaking",
+      "card_number": 90,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Shortcoming of All Variable Expense Method",
+      "back": "Since the All Variable Expense Method treats all expenses as\nvariable, this method can result in inaccurate cost estimates\nif some expenses are truly fixed. If some expenses are\nfixed, then this method will undercharge risks with lower\nthan average premium, since it assumes that all expenses\nare variable and are fully reduced with the lower average\npremium. Similarly, it will overcharge risks with higher than\naverage premium, as it bases the expenses fully on the higher\naverage premium.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-91",
+      "deck": "Ratemaking",
+      "card_number": 91,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "One way to address shortcoming of All Variable",
+      "back": "One way to address shortcoming of All Variable Expense Method\nUse a premium discount or expense constant in the rating\nalgorithm.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-92",
+      "deck": "Ratemaking",
+      "card_number": 92,
+      "section": "B.6. LAE,UWExpenses,and Profit Load June 28,2015",
+      "front": "3 shortcomings of Premium-Based Method, and how",
+      "back": "3 shortcomings of Premium-Based Method, and how they can be addressed\n1. One-time changes can cause historical expense ratios to\nbe different than the expected future ratios. One way to\ncorrect for this is to on-level premiums (and expenses if\nneeded) before calculating the expense ratios, though it can\nbe difficult to on-level countrywide premiums.\n2. Premium and/or expense trends can also impact expense\nratios. A solution to correcting for this is to trend all\npremiums and expenses to the projected future level before\ncalculating expense ratios.\n3. This method can create inequitable rates across states for\nmulti-state insurers when countrywide fixed expenses are\nallocated to the state level. The issue is that states with\nhigher average premium will get a higher allocation of fixed\nexpenses, which may not be fair. One way to solve this\nwould be to calculate fixed expense ratios by state.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-93",
+      "deck": "Ratemaking",
+      "card_number": 93,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "4 possible enhancements to the Exposure/Policy",
+      "back": "4 possible enhancements to the Exposure/Policy Based Projection Method\n1. Finding a more scientific way to split expenses into fixed\nand variable components.\n2. Finding a more equitable way to allocate countrywide\nexpenses to states.\n3. Some expenses that are considered fixed actually do vary\nby characteristics such as whether a policy is new business\nor a renewal. To the extent that the distribution of these\ncharacteristics varies by state or is changing over time,\nthis method could result in inequitable allocations of fixed\nexpenses.\n4. The existence of economies of scale in a changing book of\nbusinesswillleadtoincreasingordecreasingfutureaverage\nexpenses per exposure. These impacts could be identified\nmore directly and quantified.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-94",
+      "deck": "Ratemaking",
+      "card_number": 94,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "2 ways to incorporate non-proportional reinsurance",
+      "back": "2 ways to incorporate non-proportional reinsurance costs into ratemaking\n1. Restate all premium and loss data to be net of reinsurance.\n2. Calculate the net cost of reinsurance and treat it as a fixed\nexpense.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-95",
+      "deck": "Ratemaking",
+      "card_number": 95,
+      "section": "B.6. LAE,UWExpenses,and Profit Load April 25,2014",
+      "front": "Formulas for Variable PLR and Total PLR",
+      "back": "Variable PLR = 1 - Variable Expense % - Target UW Profit %\nTotal PLR = 1 - Total Expense % - Target UW Profit %",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-96",
+      "deck": "Ratemaking",
+      "card_number": 96,
+      "section": "B.7. Overall Rate Indications April 25,2014",
+      "front": "Differences between Pure Premium and Loss Ratio",
+      "back": "Differences between Pure Premium and Loss Ratio methods\n1. The Loss Ratio Method relies on the loss ratio, which\nrequires premium in the denominator. This means that\ncurrent premium must be available, and it must then be\non-leveled, developed (if necessary), and trended.\nThe Pure Premium Method relies on pure premium, which\nrequires exposures in the denominator. This means that\nexposures must be well defined. Also, future exposures will\nneed to be estimated. If that estimate is based on historical\nexposures, then those exposures need to be developed (if\nnecessary) and trended.\n2. The output of the 2 methods is different. The Pure Premium\nMethod produces an indicated average rate, and the Loss\nRatio Method produces an indicated rate change.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-97",
+      "deck": "Ratemaking",
+      "card_number": 97,
+      "section": "B.8. Claims-Made Ratemaking April 25,2014",
+      "front": "What is a coverage trigger?",
+      "back": "A coverage trigger is the event that must occur in order for an\ninsurance policy to apply to a claim.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-98",
+      "deck": "Ratemaking",
+      "card_number": 98,
+      "section": "B.8. Claims-Made Ratemaking April 25,2014",
+      "front": "Two types of coverage triggers in insurance",
+      "back": "1. Occurrence: Occurrence policies cover claims that occur\nduring the effective policy period, regardless of when the\nclaim is reported to the insurer. The coverage trigger on\nthese policies is the occurrence of the accident.\n2. Claims-made: Claims-made policies cover claims that are\nreported to the insurer during the effective policy period,\nregardless of when the claim occurred. The coverage trigger\non these policies is the reporting of the claim.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-99",
+      "deck": "Ratemaking",
+      "card_number": 99,
+      "section": "B.8. Claims-Made Ratemaking April 25,2014",
+      "front": "Purpose of a retroactive date provision",
+      "back": "A retroactive provision limits claims covered under a\nclaims-made policy to only claims that occur after the start\nof the first claims-made policy term (and are reported during\na claims-made policy term). This prevents coverage overlap\nwith any prior occurrence policies.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-100",
+      "deck": "Ratemaking",
+      "card_number": 100,
+      "section": "B.8. Claims-Made Ratemaking April 25,2014",
+      "front": "Purpose of an extended reporting endorsement",
+      "back": "To allow for claims that occur during a claims-made policy\nperiod, but are reported after the claims-made policy expires.\nThis is commonly used when the insured retires or switches\nfrom a claims-made policy to an occurrence policy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-101",
+      "deck": "Ratemaking",
+      "card_number": 101,
+      "section": "B.8. Claims-Made Ratemaking April 25,2014",
+      "front": "Claims-Made Ratemaking Principles",
+      "back": "1. A claims-made policy should always cost less than an\noccurrence policy as long as claim costs are increasing.\n2. If there is a sudden, unpredictable change in the underlying\ntrends, the claims-made policy priced based on the prior\ntrend will be closer to the correct price than an occurrence\npolicy based on the prior trend.\n3. If there is a sudden, unexpected shift in the reporting\npattern, the cost of a mature claims-made policy will be\naffected relatively little, if at all, relative to the occurrence\npolicy.\n4. Claims-made policies incur no liability for pure IBNR, so\nthe risk of reserve inadequacy is greatly reduced.\n5. The investment income earned from claims-made policies\nis substantially less than under occurrence policies.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-102",
+      "deck": "Ratemaking",
+      "card_number": 102,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "Definitions of adverse selection and favorable",
+      "back": "Definitions of adverse selection and favorable selection\nAdverse selection: Not using a risk characteristic that is used\nby competitors, and attracting underpriced customers as a\nresult.\nFavorable selection: Using a risk characteristic that is not\nused by competitors, and attracting profitable customers as\na result.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-103",
+      "deck": "Ratemaking",
+      "card_number": 103,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "Definition of skimming the cream",
+      "back": "Identifying a lower cost group of insureds that has not been\nidentified by the competition and recognizing that difference\nin underwriting or marketing instead of rating.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-104",
+      "deck": "Ratemaking",
+      "card_number": 104,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "Definition of risk classification",
+      "back": "The grouping of risks with similar risk characteristics\n(expected costs) for the purpose of setting prices.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-105",
+      "deck": "Ratemaking",
+      "card_number": 105,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "4 criteria for evaluating rating variables",
+      "back": "1. Statistical\n2. Operational\n3. Social\n4. Legal",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-106",
+      "deck": "Ratemaking",
+      "card_number": 106,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "3 statistical criteria for evaluating a rating variable",
+      "back": "1. Statistical Significance - Expected costs should vary by\nclass with an acceptable level of statistical confidence, and\nthis should be fairly consistent over time.\n2. Homogeneity - The expected costs for each of the\nindividual risks within a class should be reasonably similar,\nwith no clearly identifiable subclasses with significantly\ndifferent loss potential.\n3. Credibility - The classes should be large enough or stable\nenough to allow credible statistical predictions, but a class\nneed not be fully credible on its own.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-107",
+      "deck": "Ratemaking",
+      "card_number": 107,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "3 operational criteria for evaluating a rating variable",
+      "back": "1. Objective - Classes should be measurable and clearly\ndefined: exhaustive and mutually exclusive.\n2. Inexpensive to administer - The cost of obtaining and\nmaintaining the data to establish classes should not be too\nhigh.\n3. Verifiable - The levels of a rating variable should be\neasily verifiable and minimize the ability for intentional\nmisclassification.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-108",
+      "deck": "Ratemaking",
+      "card_number": 108,
+      "section": "C.1. Risk Classification November 11,2015",
+      "front": "4 social criteria for evaluating a rating variable",
+      "back": "1. Affordability - Especially desirable for compulsory\ninsurance programs. Subsidies often exist to promote\naffordability.\n2. Causality - If a cause and effect relationship can be shown\nor seems intuitive, it will increase public acceptability of the\nclassification.\n3. Controllability - Good because it encourages insureds to\nreduce hazards.\n4. Privacy - Insureds should feel that their privacy is not being\ninfringed upon.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-109",
+      "deck": "Ratemaking",
+      "card_number": 109,
+      "section": "C.2. Univariate Classification April 25,2014",
+      "front": "Main distortion in the Pure Premium Approach to",
+      "back": "Main distortion in the Pure Premium Approach to class ratemaking\nIt assumes that there is no correlation between exposures\nfor different rating variables (i.e., distributional bias). If\nthe exposures of the levels of the rating variable you are\nanalyzing are correlated with the exposures of the levels\nof another rating variable, then this approach will “double\ncount” the experience of those levels.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-110",
+      "deck": "Ratemaking",
+      "card_number": 110,
+      "section": "C.2. Univariate Classification April 25,2014",
+      "front": "How the Loss Ratio Approach corrects for",
+      "back": "How the Loss Ratio Approach corrects for distributional bias\nSince it uses premiums instead of exposures, the premiums\nreflect the higher (or lower) levels of premium obtained\nwithin a class as a result of correlation with other higher (or\nlower) rated levels of other rating variables.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-111",
+      "deck": "Ratemaking",
+      "card_number": 111,
+      "section": "C.2. Univariate Classification April 25,2014",
+      "front": "Advantages and a disadvantage of the Adjusted Pure",
+      "back": "Advantages and a disadvantage of the Adjusted Pure Premium Approach\nIt doesn’t require on-leveling the premiums (as required in\nthe Loss Ratio Approach). Also, it attempts to correct for\ndistributional bias by adjusting exposures based on the levels\nof other rating variables.\nA disadvantage is that calculating the weighted average\nrelativities can be cumbersome in a rating plan with many\nvariables.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-112",
+      "deck": "Ratemaking",
+      "card_number": 112,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Advantages and disadvantage of univariate analysis",
+      "back": "Advantages: Simple to calculate and intuitive\nDisadvantage: It doesn’t properly account for the impact\nof correlated variables. This is of key importance as many\nvariables in insurance are correlated.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-113",
+      "deck": "Ratemaking",
+      "card_number": 113,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Three reasons GLMs have grown in popularity",
+      "back": "1. Increased computing power\n2. Better data availability\n3. Competitive pressure",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-114",
+      "deck": "Ratemaking",
+      "card_number": 114,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Benefits of multivariate methods (particularly GLMs)",
+      "back": "1. They properly adjust for exposure correlations between\nrating variables.\n2. Theyattempttofocusonthe“signal”inthedata(systematic\neffects) and ignore the “noise” (unsystematic effects).\n3. They provide statistical diagnostics (e.g., confidence\nintervals).\n4. They allow for the consideration of interactions between\nrating variables.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-115",
+      "deck": "Ratemaking",
+      "card_number": 115,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Advantage and disadvantages of Minimum Bias",
+      "back": "Advantage and disadvantages of Minimum Bias procedures\nAdvantage: They properly adjust for exposure correlation.\nDisadvantages: They do not provide ways to test for\nwhether variables are statistically significant and they are\ncomputationally inefficient.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-116",
+      "deck": "Ratemaking",
+      "card_number": 116,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Describe Sequential Analysis",
+      "back": "To perform the analysis, first you perform a standard\nunivariate analysis to obtain indicated relativities for a single\nvariable. Next, you perform the Adjusted Pure Premium\nApproach to obtain indicated relativities for a second\nvariable, based on adjusting exposures as a result of the prior\nvariable’s selected relativities. You then repeat the Adjusted\nPure Premium Approach for all remaining variables, having\nadjusted for all prior variables at each step. Only one pass\nthrough the variables is done, and the method is not iterative.\nWhile this method does deal with exposure correlation, the\nmain criticism is that it doesn’t have a closed-form solution,\nmeaning that the results change based on the order of\nvariables that are chosen.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-117",
+      "deck": "Ratemaking",
+      "card_number": 117,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Some important steps in solving GLMs",
+      "back": "Compiling a dataset with enough data for modeling, selecting\na link function, specifying the distribution of the underlying\nrandom process, and using maximum likelihood to calculate\nthe parameters of the model.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-118",
+      "deck": "Ratemaking",
+      "card_number": 118,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Why GLMs are usually run on frequency and severity",
+      "back": "Why GLMs are usually run on frequency and severity instead of loss ratios\nThere is no need to on-level premiums at the granular level,\nactuaries have a priori expectations of frequency and severity\npatterns but not loss ratio patterns, loss ratio models become\nobsolete when rates are changed, and there is no standard\ndistribution for modeling loss ratios.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-119",
+      "deck": "Ratemaking",
+      "card_number": 119,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Some common GLM diagnostic tests",
+      "back": "• Looking at standard errors (confidence intervals) around\nestimates.\n• Using Chi-Square tests, F-tests, and other deviance tests to\nchoose between competing models with different variables.\n• Running the model on separate consecutive time periods of\ndata to see if the estimated parameters are consistent over\ntime.\n• Building the model on 1 subset of historical data, and then\ncomparing the model’s predictions with the actual results\non a second subset of historical data (known as a holdout\nsample). This can identify whether the model is over-fitting\nor under-fitting the original dataset.\n• Judgmentally deciding whether the results seem\nreasonable.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-120",
+      "deck": "Ratemaking",
+      "card_number": 120,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "How actuaries can play a key role in using GLMs",
+      "back": "• Obtaining reliable data for use in modeling (i.e., GIGO:\nGarbage In, Garbage Out).\n• Exploring anomalous results in the GLM with additional\nanalysis.\n• Considering model results from both a statistical and\nbusiness perspective.\n• Developing appropriate methods to communicate the\nmodel results based on the company’s ratemaking\nobjectives.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-121",
+      "deck": "Ratemaking",
+      "card_number": 121,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Common types of external data used in GLMs",
+      "back": "• Geo-demographic information: such as population density\n• Weather data: such as average rainfall or number of days\nbelow freezing\n• Property characteristics: such as square footage or quality\nof the local fire department\n• Information about insured individuals or businesses: such\nas credit scores",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-122",
+      "deck": "Ratemaking",
+      "card_number": 122,
+      "section": "C.3. Multivariate Classification April 25,2014",
+      "front": "Some data mining techniques",
+      "back": "• Factor Analysis: A technique to reduce the number of\nvariables needed in a classification ratemaking analysis. An\nexample is the symbol variable in auto insurance.\n• Cluster Analysis: A method to combine similar risks into\ngroups. An example is creating territories using zip codes.\n• CART: Stands for Classification and Regression Trees. This\ncan build a set of if-then rules for use in classification.\n• MARS: Stands for Multivariate Adaptive Regression\nSpline. This helps turn continuous variables into categorical\nvariables.\n• Neural Networks: Methods by which training algorithms\nare given a set of data and identify any patterns. This\ncan help identify previously unknown interactions between\nvariables.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-123",
+      "deck": "Ratemaking",
+      "card_number": 123,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Challenges in determining indicated rates for",
+      "back": "Challenges in determining indicated rates for territories\n• Territory tends to be highly correlated with other rating\nvariables. As we’ve seen, this can be addressed using\nmultivariate analysis.\n• Territories are often set to be such small areas (e.g., zip\ncodes) that the data in each territory may have very limited\ncredibility. Addressing this challenge will be the focus of\nthis discussion.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-124",
+      "deck": "Ratemaking",
+      "card_number": 124,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Two steps in territorial ratemaking",
+      "back": "1. Establishing territorial boundaries\n2. Determining indicated rates for each territory (preferably\nusing a GLM due to the correlations with other variables)",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-125",
+      "deck": "Ratemaking",
+      "card_number": 125,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Two basic spatial smoothing approaches and",
+      "back": "Two basic spatial smoothing approaches and advantages of each\n1. Distance-based: The current geographic unit’s data is\ncredibility-weighted with the data from other geographic\nunits, with the weights diminishing with distance. The\nadvantage of this approach is that it is easy to understand\nand implement. The disadvantages are that it assumes that\ndistance has the same impact for urban and rural risks,\nand it doesn’t consider physical boundaries (e.g., rivers,\nhighways). This approach is suited best for weather-related\nperils.\n2. Adjacency-based: The current geographic unit’s\ndata is credibility-weighted with the data from rings\nof surrounding geographic units, with the weights\ndiminishing with wider rings. This approach better\nreflects urban and rural differences, and accounts for\nphysical boundaries better. This approach is suited best for\nsocio-demographic perils (e.g., theft).",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-126",
+      "deck": "Ratemaking",
+      "card_number": 126,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Two categories of clustering routines (in territorial",
+      "back": "Two categories of clustering routines (in territorial ratemaking)\n• Quantile methods: Clusters will have equal numbers of\nobservations or equal weights.\n• Similarity methods: Clusters are based on the closeness of\nestimated relativities.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-127",
+      "deck": "Ratemaking",
+      "card_number": 127,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Why standard ratemaking is problematic for",
+      "back": "Why standard ratemaking is problematic for determining ILFs\n• There is generally less data for higher limits so results can\nbe volatile.\n• Analyses can produce results that are impractical to\nimplement (e.g., a lower price for a higher limit).",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-128",
+      "deck": "Ratemaking",
+      "card_number": 128,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Assumptions commonly made in pricing ILFs",
+      "back": "• All UW expenses and profit are variable and don’t vary by\nlimit.\n• Frequency and severity are independent.\n• Frequency is the same for all limits.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-129",
+      "deck": "Ratemaking",
+      "card_number": 129,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Why loss data should be trended and developed for",
+      "back": "Why loss data should be trended and developed for ILF pricing\nHigher limits can experience higher severity trends, and\ndevelopment can take longer on larger claims.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-130",
+      "deck": "Ratemaking",
+      "card_number": 130,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Limited Average Severity for a continuous",
+      "back": "Limited Average Severity for a continuous distribution\n(cid:90) H (cid:90) ∞\nLAS(H) = xf(x)dx + H f(x)dx\n0 H",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-131",
+      "deck": "Ratemaking",
+      "card_number": 131,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Loss Elimination Ratio for a continuous distribution",
+      "back": "(cid:90) D (cid:90) ∞\nxf(x)dx + D f(x)dx\nLER(D) = 0 (cid:90) ∞ D\nxf(x)dx\n0",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-132",
+      "deck": "Ratemaking",
+      "card_number": 132,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "What an Expense Constant accounts for",
+      "back": "For expense costs that do not vary by size of risk. This is\nparticularly important for small policies since their expenses\nmay be a large portion of their premium.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-133",
+      "deck": "Ratemaking",
+      "card_number": 133,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Why small Work Comp risks have worse loss",
+      "back": "Why small Work Comp risks have worse loss experience than large risks\n• Small companies usually have less sophisticated safety\nprograms.\n• Small companies usually don’t have return-to-work\nprograms for injured workers.\n• Small companies are not as impacted by or do not qualify\nfor experience rating, so they have less incentive to prevent\nor mitigate injuries.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-134",
+      "deck": "Ratemaking",
+      "card_number": 134,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Two issues when properties are not fully insured",
+      "back": "1. The insured will not be fully covered in the event of a total\nor near-total loss.\n2. If the insurer assumes all homes are fully insured to their\nreplacement cost when calculating rates, then the premium\ncharged for underinsured policies will not be adequate to\ncover the expected losses for those policies.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-135",
+      "deck": "Ratemaking",
+      "card_number": 135,
+      "section": "C.4. Special Classifications September 17,2014",
+      "front": "How premium rate changes as ITV increases based on",
+      "back": "How premium rate changes as ITV increases based on skew of severity\ndistribution\n• For right-skewed distributions (small losses are more\nlikely), the rate per $1k of coverage will decrease at a\ndecreasing rate as coverage increases.\n• For uniform distributions, the rate per $1k of coverage will\ndecrease at a constant rate as coverage increases.\n• For left-skewed distributions, the rate per $1k of coverage\nwill decrease at an increasing rate as coverage increases.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-136",
+      "deck": "Ratemaking",
+      "card_number": 136,
+      "section": "C.4. Special Classifications April 23,2014",
+      "front": "Coinsurance apportionment ratio, payment, and",
+      "back": "Coinsurance apportionment ratio, payment, and penalty formulas\nF\na = min[ , 1]\ncV\nI = min[aL, F]\ne = min[L, F] - I",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-137",
+      "deck": "Ratemaking",
+      "card_number": 137,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "3 necessary criteria for credibility",
+      "back": "1. 0 ≤ Z ≤ 1\n2. Z should increase as n increases. Mathematically: dZ ≥ 0\ndn\n3. Z should increase as n increases at a decreasing rate.\nMathematically: d (Z/n) < 0\ndn",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-138",
+      "deck": "Ratemaking",
+      "card_number": 138,
+      "section": "C.5. Credibility April 24,2014",
+      "front": "Formulas for Classical and Bühlmann credibility",
+      "back": "(cid:16)(cid:113) (cid:17)\nClassical: Z = min n ,1\nN\n0\nBühlmann: Z = N\nN+K",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-139",
+      "deck": "Ratemaking",
+      "card_number": 139,
+      "section": "C.5. Credibility April 24,2014",
+      "front": "6 desirable qualities for a complement of credibility",
+      "back": "1. Accurate: i.e., should be close to the target\n2. Unbiased: i.e., should be on target on average\n3. Statistically independent from the base statistic:\notherwise errors can compound\n4. Available: otherwise not practical\n5. Easy to compute: otherwise difficult to justify to others\n6. Logical relationship to base statistic: otherwise difficult to\njustify to others",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-140",
+      "deck": "Ratemaking",
+      "card_number": 140,
+      "section": "C.5. Credibility April 24,2014",
+      "front": "Advantages and disadvantages of complement: Loss",
+      "back": "Advantages and disadvantages of complement: Loss costs of a larger group\nthat includes the group being rated\nThe advantages of this approach are accuracy (more data\nleads to more stability), availability, and being easy to\ncompute. If a reasonable choice is made, it can also\nhave a logical connection to the subject experience. If the\nsubject experience is excluded from the complement, then the\ncomplement may also be independent. The disadvantage of\nthis approach is that it can be biased, since there is a reason\nthe subject group has been separated from the larger group.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-141",
+      "deck": "Ratemaking",
+      "card_number": 141,
+      "section": "C.5. Credibility April 24,2014",
+      "front": "Advantages and disadvantages of complement: Loss",
+      "back": "Advantages and disadvantages of complement: Loss costs of a larger related\ngroup\nThis complement is usually biased, but it is generally\navailable, easy to compute, independent from the subject\nexperience, and possibly accurate. It may have a logical\nrelationship to the subject experience if chosen reasonably.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-142",
+      "deck": "Ratemaking",
+      "card_number": 142,
+      "section": "C.5. Credibility March 18,2016",
+      "front": "Advantages and disadvantages of complement: Rate",
+      "back": "Advantages and disadvantages of complement: Rate change from the larger\ngroup applied to present rates\nThis complement is usually unbiased, it is generally available,\neasy to compute, independent from the subject experience,\nand possibly accurate. It may have a logical relationship to\nthe subject experience if chosen reasonably.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-143",
+      "deck": "Ratemaking",
+      "card_number": 143,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Advantages and disadvantages of complement:",
+      "back": "Advantages and disadvantages of complement: Harwayne’s Method\nThis complement is unbiased, accurate, mostly independent,\navailable, and has a logical relationship to the subject\nexperience. Since it is a little harder to compute, it is\nalso harder to explain the logical relationship to the subject\nexperience.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-144",
+      "deck": "Ratemaking",
+      "card_number": 144,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Advantages and disadvantages of complement:",
+      "back": "Advantages and disadvantages of complement: Trended Present Rates\nThis complement may or may not be accurate based on\nstability of indications, it is unbiased, it may or may not be\nindependent, it is readily available, it is easy to compute, and\nit has a logical relationship to the subject experience.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-145",
+      "deck": "Ratemaking",
+      "card_number": 145,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Trended Present Rates pure premium and loss ratio",
+      "back": "Trended Present Rates pure premium and loss ratio formulas\nWhen using the pure premium method, the complement is:\nC = Current Rate × Loss Trend Factor ×\nPriorIndicatedLossCost\nLossCostImplementedwithLastReview\nWhen using the loss ratio method, the complement is:\nC = LossTrendFactor × PriorIndicatedRateChangeFactor\nPremiumTrendFactor PriorImplementedRateChangeFactor\nThe first fraction above is called the Loss Ratio Trend Factor.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-146",
+      "deck": "Ratemaking",
+      "card_number": 146,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Advantages and disadvantages of complement:",
+      "back": "Advantages and disadvantages of complement: Competitor’s rates\nThis can be biased, inaccurate, and difficult to obtain.\nHowever it is independent, easy to compute, and has a logical\nrelationship to the subject experience.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-147",
+      "deck": "Ratemaking",
+      "card_number": 147,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Increased Limits Analysis Complement formula and",
+      "back": "advantages/disadvantages\nThe complement for the layer L excess of A is:\nILF −ILF\nC = Losses capped at A × A+L A\nILF\nA\nIf the increased limit factors are based on a different size of\nloss distribution than the subject experience, then this is a\nbiased complement. This is independent and practical if the\ndata is available, but the relationship to the subject experience\nmay not be logical due to the possible bias, and it may be\ninaccurate due to the low volume of data.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-148",
+      "deck": "Ratemaking",
+      "card_number": 148,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Lower Limits Analysis Complement formula and",
+      "back": "Lower Limits Analysis Complement formula and advantages/disadvantages\nThe complement for the layer L excess of A is:\nILF −ILF\nC = Losses capped at d × A+L A\nILF\nd\nThis is more biased than Increased Limits Analysis but it is\nmore accurate. This is independent and practical if the data is\navailable, but the relationship to the subject experience may\nnot be logical due to the possible bias.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-149",
+      "deck": "Ratemaking",
+      "card_number": 149,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Limits Analysis Complement formula and",
+      "back": "Limits Analysis Complement formula and advantages/disadvantages\nThe complement for the layer L excess of A is:\nILF −ILF\nC = Expected Loss Ratio × ∑ Premium × min(d,A+L) A\nd ILF\nd\nd>A\nIf the increased limit factors are based on a different size of\nloss distribution than the subject experience, then this is a\nbiased complement. This is independent and practical if the\ndata is available, but the relationship to the subject experience\nmay not be logical due to the possible bias, and it may be\ninaccurate due to the low volume of data.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-150",
+      "deck": "Ratemaking",
+      "card_number": 150,
+      "section": "C.5. Credibility November 22,2014",
+      "front": "Fitted Curves Complement formula and",
+      "back": "Fitted Curves Complement formula and advantages/disadvantages\nThe complement for the layer L excess of A is:\n (cid:90) A+L (cid:90) ∞ \n(x − A)f(x)dx + Lf(x)dx\n \nC = G.U. Loss × A (cid:90) ∞ A+L \n \nxf(x)dx\n−∞\nG.U. Loss = Ground-up Loss\nIf the fitted curve is accurate, then this approach is more\naccurate, less biased, has a logical relationship to the subject\nexperience, and is more stable than the other methods.\nHowever, it is less independent since the underlying data is\nneeded to fit the curve. Also, it is not easy to compute, and\nthe data may not be available.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-151",
+      "deck": "Ratemaking",
+      "card_number": 151,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "Why individual risk rating is more common in",
+      "back": "Why individual risk rating is more common in commercial lines\n• Exposure to loss varies more from risk to risk\n• Classification plans are not as refined due to limited data\n• Individual insureds can be large enough to have credibility",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-152",
+      "deck": "Ratemaking",
+      "card_number": 152,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "The ISO CGL Experience Rating Mod Formula",
+      "back": "Mod = Z × AER−EER\nEER\nadd 1 to obtain this in factor form.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-153",
+      "deck": "Ratemaking",
+      "card_number": 153,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "ISO Actual Experience Ratio (AER) Components",
+      "back": "Numerator: Actual basic limits losses and ALAE to date\nlimited by the MSL + Expected Development\nDenominator: Expected ultimate basic limits losses and\nALAE NOT limited by the MSL (also known as the Company\nSubject Loss Cost)",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-154",
+      "deck": "Ratemaking",
+      "card_number": 154,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "ISO Expected Experience Ratio (EER) Components",
+      "back": "Numerator: Expected ultimate basic limits losses and ALAE\nlimited by the MSL\nDenominator: Expected ultimate basic limits losses and\nALAE NOT limited by the MSL (also known as the Company\nSubject Loss Cost)\nIf there is no MSL, then EER = 1",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-155",
+      "deck": "Ratemaking",
+      "card_number": 155,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "Steps to calculate the ISO CGL Experience Mod",
+      "back": "1. BLEL for each subline = Expected Loss Ratio times annual\nbasic limits company premium for that subline.\n2. Detrend the BLEL by year and subline to get CSLC values.\n3. Sum the CSLC values across all years and sublines.\n4. Expected Development for each subline and year = product\nof the CSLC for each year and subline of the experience\nperiod times the EER times the % unreported values.\n5. Sum up the Expected Development values.\n6. Cap each individual actual loss at basic limits, then cap\nbasic limits losses + ALAE by the MSL. Sum the result.\n7. Finally, calculate the Mod.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-156",
+      "deck": "Ratemaking",
+      "card_number": 156,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "NCCI Experience Mod Formulas - both ways",
+      "back": "Z A +(1−Z )E +Z A +(1−Z )E\nMod = p p p p e e e e\nE +E\np e\nA +WA +(1−W)E +B\nMod = p e e\nE+B\nZ = E\np E+B\nZ = WZ\ne p",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-157",
+      "deck": "Ratemaking",
+      "card_number": 157,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "NCCI Experience Rating Expected Loss Components",
+      "back": "NCCI Experience Rating Expected Loss Components calculations\nE = (Payroll /100) × ELR\ni i i\nE = ∑ E\ni\ni\nE = ∑ D × E\np i i\ni\nE = E − E\ne p",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-158",
+      "deck": "Ratemaking",
+      "card_number": 158,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "When Schedule Rating can be used",
+      "back": "To reflect individual risk characteristics that are not already\nreflected in the rate calculation and are not already captured\nin experience rating.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-159",
+      "deck": "Ratemaking",
+      "card_number": 159,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "Steps to determine loss-rated composite rate",
+      "back": "1. Calculate trended ultimate loss and ALAE by coverage and\nyear for each of the last 5 completed years of experience,\nand sum the result.\n2. Select a composite exposure base and measure exposures\nusing this exposure base for each year. If inflation-sensitive,\ntrend the exposures. Sum the (possibly trended) exposures\nacross all years.\n3. Calculate Adjusted Premium using the result from step 1\n(total trended ultimate losses and ALAE for the 5 years\nof experience) divided by a given Expected Loss & ALAE\nRatio.\n4. Calculate the Composite Rate by dividing Adjusted\nPremium by the total exposures from step 2.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-160",
+      "deck": "Ratemaking",
+      "card_number": 160,
+      "section": "D.1. Individual Risk Rating April 29,2014",
+      "front": "Unique considerations in pricing deductible policies",
+      "back": "• Claims handling: Who is responsible for adjusting claims\nbelow the deductible?\n• Application of the deductible: Losses only or to losses and\nALAE?\n• Deductible processing: If the insurer pays all losses first\nand then seeks reimbursement from the insured for losses\nbelow the deductible, there will be an extra cost for the\ninsurertobillandprocesstheseamounts. Inaddition, credit\nrisk may also exist in case the insured is unable to pay for\nthese amounts.\n• Risk margin: Losses above the deductible are very difficult\nto estimate, so the profit margin may be increased to reflect\nthe higher level of risk that the insurer is taking in writing\nthe policy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-161",
+      "deck": "Ratemaking",
+      "card_number": 161,
+      "section": "D.1. Individual Risk Rating November 22,2014",
+      "front": "Retrospective rating main formulas",
+      "back": "R = (b + CA)T H ≤ R ≤ G\n\nA if A ≤ A\n H H\n\nR = (b + CL)T where L = A if A < A < A\nH G\n\n A if A ≥ A\nG G\nb = e − (C − 1)E[A] + CI\nI = (Insurance Charge - Insurance Savings) × E[A]\nExpectedLossesabove A\nInsurance Charge = G\nE[A]\nExpectedshortfallofLossesbelow A\nInsurance Savings = H\nE[A]",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-162",
+      "deck": "Ratemaking",
+      "card_number": 162,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Examples of rate regulation in the U. S.",
+      "back": "• Limiting the amount of rate changes: This can apply to the\noverall change on the book, or it can apply to individual\ncustomers.\n• Requiring written notices to insureds receiving large rate\nincreases.\n• Prohibiting certain rating variables: e.g., credit score\n• Prescribing certain ratemaking techniques: e.g.,\nmultivariate techniques\n• Revising ratemaking assumptions: e.g., a regulator may\ndisagree on loss trend selections, requiring the indication to\nbe revised. This can cause indications to change or delays\nin implementation.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-163",
+      "deck": "Ratemaking",
+      "card_number": 163,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Actions that insurers can take to respond to",
+      "back": "Actions that insurers can take to respond to regulatory restrictions\n• Take legal action: i.e., challenge the regulation in court\n• Revise underwriting guidelines to limit business at\ninadequate rates\n• Revise marketing to limit business at inadequate rates\n• Use proxy variables when a variable is prohibited",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-164",
+      "deck": "Ratemaking",
+      "card_number": 164,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Two types of operational constraints",
+      "back": "Systems limitations consist of the cost to implement the\nchange in the insurer’s computer systems. This cost depends\non the extent of the changes and the number of computer\nsystems impacted.\nAn example of a resource constraint would be if a new\nratingvariablerequiresthehiringofspecializedstafftocollect\nor process the data for the new variable. For example,\nspecializedinspectorsmayneedtobehiredtovisuallyinspect\nthe insured property to obtain the necessary data. It may be\nprohibitively expensive for the insurer to hire these inspectors\nrelative to the expected benefit of the additional information.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-165",
+      "deck": "Ratemaking",
+      "card_number": 165,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Graph relating price, demand, and total profit",
+      "back": "",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-166",
+      "deck": "Ratemaking",
+      "card_number": 166,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Factors that influence an insured’s purchasing",
+      "back": "Factors that influence an insured’s purchasing decision\n• Competitor’s prices\n• Overall cost of the product\n• Rate changes (for existing customers)\n• Insured characteristics: e.g., how sensitive to prices are they\n• Customer satisfaction and brand loyalty",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-167",
+      "deck": "Ratemaking",
+      "card_number": 167,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Difference between distributional analysis and",
+      "back": "Difference between distributional analysis and policyholder dislocation\nanalysis\nInsurers can use distributional analysis to identify which\nsegments of the book are growing and shrinking over time, or\nhow the insurer’s market share varies by segment of the book.\nPolicyholder dislocation analysis can be used to identify the\nimpact of rate changes on existing customers. The calculation\nis to quantify how many customers will receive rate changes\nof different percentages or dollar amounts, as customers with\nlarge changes may be expected to have a lower probability of\nretention.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-168",
+      "deck": "Ratemaking",
+      "card_number": 168,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Describe Optimized Pricing",
+      "back": "Optimized Pricing uses multivariate techniques to estimate\nthe price elasticity of new and renewal customers based on\nthe characteristics of those customers. These estimates can\nbe used to better predict the impact of a rate change on close\nratios and retention ratios. With these estimates in addition\nto the loss estimates, the insurer can test different scenarios\nof rate changes and how they will impact the total profit and\ngrowth of the insurer.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-169",
+      "deck": "Ratemaking",
+      "card_number": 169,
+      "section": "E.1. Other Considerations April 29,2014",
+      "front": "Steps in the underwriting cycle",
+      "back": "• A “hard” market is when prices and insurer profits are high,\nbut growth is low due to the high prices.\n• In an effort to attract more business at these higher profit\nlevels, some insurers will lower rates.\n• This causes all insurers to lower rates to maintain their\ncompetitiveness in the market place. This price competition\ndrives down the profit levels for all insurers. This is called\na “soft” market when prices are low and companies are\ngrowing.\n• In response to these low (or negative) profit levels, insurers\nrestrict the writing of business and raise prices to improve\nprofitability.\n• Eventually, all insurers raise prices and the market again\nbecomes hard.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-170",
+      "deck": "Ratemaking",
+      "card_number": 170,
+      "section": "E.1. Other Considerations November 21,2014",
+      "front": "Differences between traditional P/C pricing and asset",
+      "back": "Differences between traditional P/C pricing and asset share pricing\nTraditional ratemaking techniques only consider the\nexperience of a single period of time. As such, they\nfail to consider differences in persistency between risks.\nPersistency can have a significant impact due to loss and\nexpense differences between new and renewal business. The\nasset share pricing model accounts for this by introducing\nmultiple periods, persistency, and different assumptions for\nnew and renewal business.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-171",
+      "deck": "Ratemaking",
+      "card_number": 171,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Steps to obtain new rates for an existing product",
+      "back": "• Select target overall average premium (or overall rate\nchange)\n• Finalize the rating algorithm\n• Select final new rates for each rating variable\n• Select final additive amounts (e.g., expense fees) if\napplicable\n• Derive final base rate needed to achieve the target premium",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-172",
+      "deck": "Ratemaking",
+      "card_number": 172,
+      "section": "E.2. Implementation August 14,2014",
+      "front": "Fixed Expense Fee formula",
+      "back": "FixedExpenseperExposure\nFixed Expense Fee per Exposure =\n1−V−Q\nFixed Expense Fees can be converted to a per policy basis\ninstead of a per exposure basis if desired by multiplying the\nFixedExpenseFeeperExposurebytheaverage#ofexposures\nper policy.",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-173",
+      "deck": "Ratemaking",
+      "card_number": 173,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Formula for new base rate without rating factor",
+      "back": "Formula for new base rate without rating factor changes\nB = B × P P −Fee P\nP C P −Fee\nC C",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-174",
+      "deck": "Ratemaking",
+      "card_number": 174,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Formula for new base rate using Extension of",
+      "back": "Formula for new base rate using Extension of Exposures\nB = B × P P −Fee P\nP S P −Fee\nS P",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-175",
+      "deck": "Ratemaking",
+      "card_number": 175,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Formula for new base rate using Average Rate",
+      "back": "Formula for new base rate using Average Rate Differential\nP −Fee\nB = P P\nP ProposedAverageFactor",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-176",
+      "deck": "Ratemaking",
+      "card_number": 176,
+      "section": "E.2. Implementation April 27,2015",
+      "front": "Formula for new base rate using Change in Average",
+      "back": "Formula for new base rate using Change in Average Rate Differential\nB = B × P P −Fee P × Off-Balance Factor\nP C P −Fee\nC C",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-177",
+      "deck": "Ratemaking",
+      "card_number": 177,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Advantages and Disadvantages of using Extension of",
+      "back": "Advantages and Disadvantages of using Extension of Exposures to obtain\nnew base rate\nAdvantage: Most accurate method\nDisadvantage: Requires detailed data and calculations",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-178",
+      "deck": "Ratemaking",
+      "card_number": 178,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Advantages and Disadvantages of using",
+      "back": "Advantages and Disadvantages of using Approximated Average Rate\nDifferential method to obtain new base rate\nAdvantage: Doesn’t require detailed exposure data\nDisadvantages: Less accurate than extension of exposures\ndue to distributional bias, and requires calculating the\naverage factor for all variables in the rating plan (even\nvariables with rates that aren’t changing)",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-179",
+      "deck": "Ratemaking",
+      "card_number": 179,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Advantages and Disadvantages of using",
+      "back": "Advantages and Disadvantages of using Approximated Change in Average\nRate Differential method to obtain new base rate\nAdvantage: Doesn’t require detailed exposure data, and only\nrequires looking at variables with rates that are changing\nDisadvantages: Less accurate than extension of exposures\ndue to distributional bias",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-180",
+      "deck": "Ratemaking",
+      "card_number": 180,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Purpose of minimum premiums, and formulas used",
+      "back": "Purpose of minimum premiums, and formulas used to calculate effect and\noffset for introducing a minimum premium\nPurpose: To make sure premiums for each policy are large\nenough to cover expected fixed expenses and some minimal\namount of expected losses.\nEffect = (Prem with Min / Prem without Min) - 1\nBase Rate Offset = 1 / (1 + Effect)",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-181",
+      "deck": "Ratemaking",
+      "card_number": 181,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Steps to capping a non-base level of a variable (for a",
+      "back": "Steps to capping a non-base level of a variable (for a rate increase cap)\n• Lower the factor for the level to comply with cap\n• Increase the base rate to make up lost premium\n• Lower the factor for the level as a result of base rate increase",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-182",
+      "deck": "Ratemaking",
+      "card_number": 182,
+      "section": "E.2. Implementation April 30,2014",
+      "front": "Steps to capping a base level of a variable (for a rate",
+      "back": "Steps to capping a base level of a variable (for a rate increase cap)\n• Lower the base rate to comply with cap\n• Increase the factors for non-base levels to make up lost\npremium from applying the cap\n• Re-increase the factors for non-base levels to make up lost\npremium from the base rate decrease",
+      "tags": []
+    },
+    {
+      "id": "Ratemaking-183",
+      "deck": "Ratemaking",
+      "card_number": 183,
+      "section": "E.2. Implementation June 16,2014",
+      "front": "Considerations when implementing a premium",
+      "back": "Considerations when implementing a premium transition rule\n• Determining the cap amounts, perhaps based on profit\nscenario testing.\n• Therulesshouldallowforsomelargechanges(e.g., changes\nin exposure, or claim surcharges), but should limit the\nimpact of rate changes.\n• Shorter transition periods are preferable, especially since\nmultiple rate change transition rules can start to overlap.\n• You need to decide on how to implement (and file the\nchange).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-1",
+      "deck": "Reserving",
+      "card_number": 1,
+      "section": "F.1. Goalsof Reserving November 12,2015",
+      "front": "Why accurate estimates of unpaid claims are",
+      "back": "Why accurate estimates of unpaid claims are important\n1. Internal Management: The estimates are used to make\nbusiness decisions in pricing and underwriting, as well as\nstrategic and financial decisions.\n2. Investors: The estimates impact the profitability of the\ninsurer and thus the returns paid to investors.\n3. Regulators: The estimates are used to monitor the solvency\nof the insurer.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-2",
+      "deck": "Reserving",
+      "card_number": 2,
+      "section": "F.1. Goalsof Reserving November 12,2015",
+      "front": "Accounting, valuation, and review date definitions",
+      "back": "1. Accounting date: This defines the group of claims being\nanalyzed, and determines the date for the paid/unpaid\nsplit.\n2. Valuation date: This defines the date through which\ntransactions are included in the analysis, and this could be\nthe same as, prior to, or after the accounting date.\n3. Review date: The date (after the valuation date) through\nwhich material information known to the actuary is\nincluded in the analysis.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-3",
+      "deck": "Reserving",
+      "card_number": 3,
+      "section": "F.1. Goalsof Reserving November 12,2015",
+      "front": "5 components of unpaid claims",
+      "back": "1. Case reserves\n2. Provision for development on known claims\n3. Reopened claims reserve\n4. Provision for claims incurred but not reported (aka “pure”\nIBNR)\n5. Provision for claims in transit (incurred and reported but\nnot recorded)",
+      "tags": []
+    },
+    {
+      "id": "Reserving-4",
+      "deck": "Reserving",
+      "card_number": 4,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Expected Claims Formula for Estimated Ultimate",
+      "back": "Expected Claims Formula for Estimated Ultimate Claims\nEstimated Ultimate Claims for AY YYYY = Expected Claim\nRatio × Earned Premium for AY YYYY\nEstimated Ultimate Claims for AY YYYY = Expected Pure\nPremium × Earned Exposures for AY YYYY",
+      "tags": []
+    },
+    {
+      "id": "Reserving-5",
+      "deck": "Reserving",
+      "card_number": 5,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Assumptions of Expected Claims Method",
+      "back": "The main assumption is that ultimate claims for an exposure\nperiod can be better estimated based on an a priori estimate\nthan using the experience observed to date for that exposure\nperiod. Another way of stating this is that the claims reported\nand paid to date for that exposure period tell you no useful\ninformation about your ultimate claims for that exposure\nperiod.\nA secondary assumption is that a reasonable expected claim\nratio can be obtained.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-6",
+      "deck": "Reserving",
+      "card_number": 6,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Common uses of Expected Claims Method",
+      "back": "• When entering a new line of business, as there is insufficient\ndata to obtain historical development factors.\n• When operational or environmental changes make\nhistorical data irrelevant for projecting ultimate claims\n(e.g., expanded coverage due to a recent court decision).\n• When estimating ultimates at early maturities for\nlong-tailed lines of business where the early age-to-ultimate\nfactors are highly leveraged.\n• When data is unavailable so other methods cannot be used.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-7",
+      "deck": "Reserving",
+      "card_number": 7,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Advantage and disadvantage of Expected Claims",
+      "back": "Advantage and disadvantage of Expected Claims Method\nThis method has the advantage of providing a stable\nestimate of ultimate claims, but the disadvantage of being\nunresponsive to recent experience.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-8",
+      "deck": "Reserving",
+      "card_number": 8,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "2 challenges of using the Expected Claims Method",
+      "back": "1. Determining the appropriate exposure base.\n2. Estimating claims relative to that exposure base.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-9",
+      "deck": "Reserving",
+      "card_number": 9,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Why we exclude the data for the year for which we",
+      "back": "Why we exclude the data for the year for which we are calculating ultimates\nin calculating the expected claim ratio when using the Expected Claims\nmethod\nBecause using that data would violate the main assumption\nof the Expected Claims method.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-10",
+      "deck": "Reserving",
+      "card_number": 10,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "Briefly describe the steps for calculating the expected",
+      "back": "Briefly describe the steps for calculating the expected claim ratio using the\nExpected Claims method\n1. Develop claims to ultimate for each year of historical\nexperience (usually using the chain-ladder method to\nobtain ultimate claims).\n2. Calculate the ultimate claim ratio for each year of historical\nexperience by dividing ultimate claims by earned premium.\n3. Adjust the historical claim ratios to be on the same rate, tort\nreform, loss trend, premium trend, and exposure trend (if\nthe exposure base is inflation sensitive) levels as the year\nfor which you are estimating ultimate claims.\n4. Select an expected claim ratio based on the adjusted\nhistorical claim ratios (perhaps by taking some sort of\naverage and excluding outliers).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-11",
+      "deck": "Reserving",
+      "card_number": 11,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "How speedups or slowdowns in settlement impact",
+      "back": "How speedups or slowdowns in settlement impact the Expected Claims\nmethod\nThe Expected Claims method is unaffected by these changes\nto the extent that the expected claim ratio is not impacted.\n• If the speedup or slowdown started in the most recent\naccident year, which is not part of the expected claim\nratio, then the estimates produced by this method will be\nunaffected by the change and will be accurate.\n• If the speedup or slowdown started in an earlier year that\nis part of the expected claim ratio calculation, then the error\nproducedby this methodwillbein thesamedirectionas the\nchain ladder method, but to a lesser extent. Note that the\nexpected claim ratio will only potentially be impacted if it\nis calculated based on paid claim data, since reported claim\ntriangles would be unaffected by speedups or slowdowns\nin settlement.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-12",
+      "deck": "Reserving",
+      "card_number": 12,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "How changes in case reserve adequacy impact the",
+      "back": "How changes in case reserve adequacy impact the Expected Claims method\nThe Expected Claims method is unaffected by these changes\nto the extent that the expected claim ratio is not impacted.\n• If the change in case adequacy started in the most recent\naccident year, which is not part of the expected claim\nratio, then the estimates produced by this method will be\nunaffected by the change and will be accurate.\n• If the change in case adequacy started in an earlier year that\nis part of the expected claim ratio calculation, then the error\nproduced by this method will be in the same direction as\nthe chain ladder method, but to a lesser extent. Note that\nthe expected claim ratio will only potentially be impacted\nif it is calculated based on reported claim data, since paid\nclaim triangles would be unaffected by these changes.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-13",
+      "deck": "Reserving",
+      "card_number": 13,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "How changes in claim ratios impact the Expected",
+      "back": "How changes in claim ratios impact the Expected Claims method\nThe Expected Claims method would not react to any changes\nin claim ratio in the most recent year since the method is not\nresponsive to these changes. As such, the method will be\ninaccurate in these situations.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-14",
+      "deck": "Reserving",
+      "card_number": 14,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "How exposure growth impacts the Expected Claims",
+      "back": "How exposure growth impacts the Expected Claims method\nThe Expected Claims method is unaffected by exposure\ngrowth on its own. If there are changes in the average\naccident date because of the exposure growth, then:\n• The Expected Claims method will still be accurate if the\naverage accidentdate changeonly startedin themost recent\nyear (which doesn’t impact the expected claim ratio).\n• If the average accident dates have changed for several\nyears, then the expected claim ratio will be impacted if it\nis calculated based on historical data using the chain-ladder\napproach. The error produced by this method will be in the\nsame direction as the chain ladder method, but to a lesser\nextent.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-15",
+      "deck": "Reserving",
+      "card_number": 15,
+      "section": "G.2. Expected Claims Method November 18,2019",
+      "front": "How mix of business changes impact the Expected",
+      "back": "How mix of business changes impact the Expected Claims method\nWhen you have a changing mix of business, the Expected\nClaims method will be impacted if either of the following are\ntrue:\n• The segments of the business that are changing have\ndifferent expected claim ratios. This would have the same\neffect as a change in claim ratio, mentioned above.\n• The segments of the business that are changing have the\nsame expected claim ratios but have different development\npatterns, AND this causes the estimate of the expected\nclaim ratio from the historical data using a chain-ladder\napproach to be inaccurate.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-16",
+      "deck": "Reserving",
+      "card_number": 16,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Bornhuetter-Ferguson Formula for Estimated",
+      "back": "Bornhuetter-Ferguson Formula for Estimated Ultimate Claims using\nreported claims data\nB-F Ultimate = Actual Reported + Expected Unreported\nClaims\nB-F Ultimate = Actual Reported + Expected Claims × %\nUnreported\nB-F Ultimate = Actual Reported + Earned Premium ×\nExpected Claim Ratio × % Unreported",
+      "tags": []
+    },
+    {
+      "id": "Reserving-17",
+      "deck": "Reserving",
+      "card_number": 17,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Bornhuetter-Ferguson Formula for Estimated",
+      "back": "Bornhuetter-Ferguson Formula for Estimated Ultimate Claims using paid\nclaims data\nB-F Ultimate = Actual Paid + Expected Unpaid Claims\nB-F Ultimate = Actual Paid + Expected Claims × % Unpaid\nB-F Ultimate = Actual Paid + Earned Premium × Expected\nClaim Ratio × % Unpaid",
+      "tags": []
+    },
+    {
+      "id": "Reserving-18",
+      "deck": "Reserving",
+      "card_number": 18,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How the B-F method is a credibility weighting of",
+      "back": "How the B-F method is a credibility weighting of other methods\nB-F Ultimate = Development Technique Ultimate × (1/CDF)\n+ Expected Claims × (1 - 1/CDF)\nThis is essentially a credibility-weighting with credibility Z =\n(1/CDF).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-19",
+      "deck": "Reserving",
+      "card_number": 19,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Benktander Formula for Estimated Ultimate Claims",
+      "back": "Benktander Formula for Estimated Ultimate Claims using reported claims\ndata\nBenktander Ultimate Claims = Actual Reported Claims + B-F\nUltimate × % Unreported",
+      "tags": []
+    },
+    {
+      "id": "Reserving-20",
+      "deck": "Reserving",
+      "card_number": 20,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How the Benktander method is a credibility",
+      "back": "How the Benktander method is a credibility weighting of other methods\nBenktander Ultimate = Development Technique Ultimate ×\n(1/CDF) + B-F Ultimate × (1 - 1/CDF)\nThis is essentially a credibility-weighting with credibility Z =\n(1/CDF).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-21",
+      "deck": "Reserving",
+      "card_number": 21,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "What happens with many iterations of the",
+      "back": "What happens with many iterations of the Benktander method?\nMore and more weight is given to the Development technique\nwith each iteration, so the Benktander estimates approach the\nDevelopment technique estimates.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-22",
+      "deck": "Reserving",
+      "card_number": 22,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Assumptions of B-F Method",
+      "back": "The main assumption is that IBNR or unpaid claims for an\nexposure period can be better estimated based on an a priori\nestimate than using the experience observed to date for that\nexposure period. Another way of stating this is that the\nclaims reported and paid to date for that exposure period tell\nyou no useful information about your IBNR or unpaid claims\nfor that exposure period.\nA secondary assumption is that a reasonable expected claim\nratio can be obtained.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-23",
+      "deck": "Reserving",
+      "card_number": 23,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Common uses of the B-F Method",
+      "back": "• When there are random fluctuations or large claims at early\nmaturities.\n• When entering a new line of business.\n• When estimating ultimates at early maturities for\nlong-tailed lines of business where the early age-to-ultimate\nfactors are highly leveraged.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-24",
+      "deck": "Reserving",
+      "card_number": 24,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Advantages of the B-F and Benktander Methods",
+      "back": "The B-F method has the advantages of providing more\nstable estimates than the Development technique and more\nresponsive estimates than the Expected Claims technique.\nThe Benktander method has the advantage of being even\nmore responsive than the B-F method while still being more\nstable than the Development technique (but not as stable as\nB-F).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-25",
+      "deck": "Reserving",
+      "card_number": 25,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "2 challenges of using the B-F and Benktander Methods",
+      "back": "1. Estimating the expected claims.\n2. Estimating the expected % unreported (or % unpaid).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-26",
+      "deck": "Reserving",
+      "card_number": 26,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "When the credibility interpretation of the B-F and",
+      "back": "When the credibility interpretation of the B-F and Benktander methods does\nnot hold\nWhen there is downward development, because the\n“credibility” that is equal to 1/CDF will be greater than 1.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-27",
+      "deck": "Reserving",
+      "card_number": 27,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "Options for dealing with downward development in",
+      "back": "Options for dealing with downward development in using the B-F or\nBenktander method\n• Continuing to use the B-F and Benktander methods.\n• Limiting the CDFs to a minimum value of 1.\n• Rely on a different technique to select ultimates for years\nwith CDFs below 1.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-28",
+      "deck": "Reserving",
+      "card_number": 28,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How speedups or slowdowns in settlement impact",
+      "back": "How speedups or slowdowns in settlement impact the B-F and Benktander\nmethods\nWhen dealing with the reported B-F or Benktander methods,\nestimates will still be accurate since both the Development\nand Expected Claims estimates based on reported claims will\nbe accurate.\nThe paid B-F or Benktander methods will overestimate\nwhen there has been a speedup in settlement, and\nwill underestimate when there has been a slowdown in\nsettlement. However, theerrorwillnotbeasbiginmagnitude\nas it would be using the Development technique, since the\nweight given to the Expected Claims technique reduces the\namount of the error.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-29",
+      "deck": "Reserving",
+      "card_number": 29,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How changes in case reserve adequacy impact the B-F",
+      "back": "How changes in case reserve adequacy impact the B-F and Benktander\nmethods\nWhen dealing with the paid B-F or Benktander methods,\nestimates will still be accurate since both the Development\nand Expected Claims estimates based on paid claims will be\naccurate.\nThe reported B-F or Benktander methods will overestimate\nwhen there has been an increase in case reserve adequacy, and\nwill underestimate when there has been a decrease in case\nreserve adequacy. However, the error will not be as big in\nmagnitude as it would be using the Development technique,\nsince the weight given to the Expected Claims technique\nreduces the amount of the error.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-30",
+      "deck": "Reserving",
+      "card_number": 30,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How changes in claim ratios impact the B-F and",
+      "back": "How changes in claim ratios impact the B-F and Benktander methods\nThe B-F and Benktander techniques do not fully react to\nchanges in claim ratios due to the weighting given to the\nExpected Claims technique. Note that reported B-F and\nBenktander methods will be more responsive than paid B-F\nand Benktander methods since more weight will be given to\nthe Development technique when reported claims are used.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-31",
+      "deck": "Reserving",
+      "card_number": 31,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How exposure growth impacts the B-F and",
+      "back": "How exposure growth impacts the B-F and Benktander methods\nThe B-F and Benktander methods are unaffected by exposure\ngrowth on its own. However, if there are changes in the\naverage accident date because of the exposure growth, then\nthese methods will be affected in the same direction but\nnot to the same extent as the Development technique. For\nexample, if the book of business is growing causing the\naverage accident date to be later in more recent years, then\nthe B-F and Benktander methods will underestimate ultimate\nclaims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-32",
+      "deck": "Reserving",
+      "card_number": 32,
+      "section": "G.3. Bornhuetter-Ferguson Method June 4,2014",
+      "front": "How mix of business changes impact the B-F and",
+      "back": "How mix of business changes impact the B-F and Benktander methods\nWhen you have a changing mix of business, the B-F and\nBenktander methods will be inaccurate if either of the\nfollowing are true:\n• The segments of the business that are changing have\ndifferent development patterns (this impacts the\nDevelopment technique, and possibly the Expected\nClaims technique depending on how the expected claim\nratio is calculated).\n• The segments of the business that are changing have\ndifferent expected claim ratios (this impacts the Expected\nClaims technique).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-33",
+      "deck": "Reserving",
+      "card_number": 33,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "Cape Cod Formula for Estimated Ultimate Claims",
+      "back": "CC Ultimate =\nReported + On-Level EP × ECR × % Unreported",
+      "tags": []
+    },
+    {
+      "id": "Reserving-34",
+      "deck": "Reserving",
+      "card_number": 34,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How to calculate the Cape Cod ECR",
+      "back": "First adjust reported claims to be at common trend levels\nand tort reform levels, and adjust earned premium to be at\ncurrent rate level and a common premium trend level. Then\nusing all years of data (including latest):\n∑ReportedClaims\nCape Cod ECR =\n∑(On-LevelEarnedPremium×%Reported)",
+      "tags": []
+    },
+    {
+      "id": "Reserving-35",
+      "deck": "Reserving",
+      "card_number": 35,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "Main assumption of Cape Cod Method",
+      "back": "Unreported claims will develop based on expected claims,\nand expected claims are derived using reported claims and\nearned premium.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-36",
+      "deck": "Reserving",
+      "card_number": 36,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "Advantages of the Cape Cod Method",
+      "back": "The key innovation and advantage of the Cape Cod method\nis that the ECR is estimated from historical data rather than\nbeing judgmentally selected.\nAnother advantage compared to the development method\nis that random fluctuations at early maturities do not\nsignificantly distort estimates.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-37",
+      "deck": "Reserving",
+      "card_number": 37,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "Disadvantages of the Cape Cod Method",
+      "back": "• CapeCodcan’tbeusedforanewlineofbusinesssincethere\nis no data to calculate the ECR.\n• Cape Cod estimates are highly dependent on the\nappropriate on-leveling of premium, and this can be\ndifficult (especially for older years).\n• When data is thin or volatile, the Cape Cod ECR will not be\nreliable, and B-F may perform better.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-38",
+      "deck": "Reserving",
+      "card_number": 38,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How speedups or slowdowns in settlement impact",
+      "back": "How speedups or slowdowns in settlement impact the Cape Cod method\nCape Cod estimates will be accurate since reported claims are\nunaffected by a change in settlement rates.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-39",
+      "deck": "Reserving",
+      "card_number": 39,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How changes in case reserve adequacy impact the",
+      "back": "How changes in case reserve adequacy impact the Cape Cod method\nThe Cape Cod method will overestimate when there has been\nan increase in case reserve adequacy and will underestimate\nwhen there has been a decrease in case reserve adequacy. The\nerror will be larger in magnitude than the B-F method, but not\nas large as the Development method.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-40",
+      "deck": "Reserving",
+      "card_number": 40,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How changes in claim ratios impact the Cape Cod",
+      "back": "How changes in claim ratios impact the Cape Cod method\nThe Cape Cod method is more responsive to changing claim\nratios than the B-F method since it calculates the ECR using\nthe most recent exposure periods. However, it is still not\nfully responsive (like the Development method). As such, for\nincreasing claim ratios, Cape Cod will understate estimates,\nbut not by as much as the B-F method.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-41",
+      "deck": "Reserving",
+      "card_number": 41,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How exposure growth impacts the Cape Cod method",
+      "back": "The Cape Cod method is unaffected by exposure growth on\nits own. However, if there are changes in the average accident\ndate because of the exposure growth, then the Cape Cod\nmethod will be affected in the same direction but not to the\nsame extent as the Development technique. For example, if\nthe book of business is growing causing the average accident\ndate to be later in more recent years, then the Cape Cod\nmethod will underestimate ultimate claims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-42",
+      "deck": "Reserving",
+      "card_number": 42,
+      "section": "G.4. Cape Cod Method June 23,2014",
+      "front": "How mix of business changes impact the Cape Cod",
+      "back": "How mix of business changes impact the Cape Cod method\nWhen you have a changing mix of business, the Cape Cod\nmethod will be inaccurate if either of the following are true:\n• The segments of the business that are changing have\ndifferent development patterns.\n• The segments of the business that are changing have\ndifferent expected claim ratios.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-43",
+      "deck": "Reserving",
+      "card_number": 43,
+      "section": "G.5. Frequency-Severity Techniques July 6,2014",
+      "front": "Assumptions of frequency-severity techniques",
+      "back": "The 3 main assumptions of frequency-severity methods are:\n1. Claim counts and severities will continue to develop in\nfuture periods as they have in past periods.\n2. Consistent definition of claim counts throughout the\nexperience period.\n3. The mix of types of claims is relatively homogeneous.\nThe disposal rate technique has the additional assumption\nthat there are no significant partial payments (i.e., claims are\npaid when they are closed).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-44",
+      "deck": "Reserving",
+      "card_number": 44,
+      "section": "G.5. Frequency-Severity Techniques July 6,2014",
+      "front": "Advantages of frequency-severity techniques",
+      "back": "• The disposal rate technique only uses paid data, so it isn’t\nimpacted by changes in case reserve adequacy.\n• Assumptions about inflation and expected claim disposal\nrates can be explicitly incorporated into the methods.\n• Gain greater insight into the claims process by\nunderstanding the rate of claim reporting and settlement\nand average dollar value of claims separately.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-45",
+      "deck": "Reserving",
+      "card_number": 45,
+      "section": "G.5. Frequency-Severity Techniques July 6,2014",
+      "front": "Disadvantages of frequency-severity techniques",
+      "back": "• Estimates are highly sensitive to the assumed trend rate.\n• Changes in the definition of claim counts impact the\nestimates.\n• Changes in claim reporting or processing impact the\nestimates.\n• The methods require a relatively homogeneous mix of\nclaims.\n• The data may not be available (i.e., claim counts may be\nunavailable).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-46",
+      "deck": "Reserving",
+      "card_number": 46,
+      "section": "G.5. Frequency-Severity Techniques July 6,2014",
+      "front": "Formula to calculate incremental closed claim counts",
+      "back": "Formula to calculate incremental closed claim counts using the disposal rate\ntechnique\nIncremental claim counts closed between y and y for AY =\n1 2\nUltimateclaimcountsforAY-ClosedcountsatlatestdiagonalforAY\n×\n1-selecteddisposalrateatlatestdiagonal\n(disposal rate at y - disposal rate at y )\n2 1",
+      "tags": []
+    },
+    {
+      "id": "Reserving-47",
+      "deck": "Reserving",
+      "card_number": 47,
+      "section": "G.5. Frequency-Severity Techniques July 6,2014",
+      "front": "Considerations for the maturity age to begin the tail",
+      "back": "Considerations for the maturity age to begin the tail and combine data for the\ntail severity\n• Combine data at the age at which results become erratic,\nsince combining the data may provide more stability.\n• The influence on the total projections of selecting a\nparticular age. If the impact on the total estimate is very\nsmall, more refined analysis may not be necessary.\n• The percentage of claims expected to be closed beyond the\nselected age. Enough claims should be there to provide a\nmore stable severity estimate when grouped, but not too\nmany claims since some should remain to provide estimates\nfor earlier maturities where the age-to-age factors are more\nstable.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-48",
+      "deck": "Reserving",
+      "card_number": 48,
+      "section": "G.6. Case Outstanding Development Technique July 9,2014",
+      "front": "Assumptions of case outstanding techniques",
+      "back": "1. Development of future claims will be similar to\ndevelopment in prior periods.\n2. Case outstanding to date provides useful information about\nfuture claims development.\nAdditionally, all the same assumptions from the development\ntechnique also apply here (consistent claims processing,\nconsistent mix of claims, stable policy limits and deductibles,\netc.).",
+      "tags": []
+    },
+    {
+      "id": "Reserving-49",
+      "deck": "Reserving",
+      "card_number": 49,
+      "section": "G.6. Case Outstanding Development Technique July 9,2014",
+      "front": "When case outstanding techniques are most useful",
+      "back": "• When looking at report year triangles.\n• For claims-made policies, since there is no pure IBNR.\n• When looking at accident year triangles, but nearly all\nclaims are reported by the first column of the triangle.\n• The 2nd approach is useful when only current case\noutstanding data is available so other techniques cannot be\nused.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-50",
+      "deck": "Reserving",
+      "card_number": 50,
+      "section": "G.6. Case Outstanding Development Technique July 9,2014",
+      "front": "Disadvantages of case outstanding techniques",
+      "back": "• In most lines of business, case outstanding do not provide\nsufficient information about pure IBNR.\n• There is a lack of industry benchmark data for accident year\napplications of this method.\n• It is not intuitive as to what paid-on-case and\nremaining-in-case ratios are appropriate at each maturity\nincluding the tail.\n• The projections can be distorted by case reserves for large\nlosses.\n• The 2nd approach depends on industry CDFs, which may\nnot be appropriate for the particular self-insurer.\n• The CDFs for the 2nd approach may be highly leveraged for\nimmature years, making estimates highly volatile.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-51",
+      "deck": "Reserving",
+      "card_number": 51,
+      "section": "G.6. Case Outstanding Development Technique July 9,2014",
+      "front": "Formula for case O/S development factor for case",
+      "back": "Formula for case O/S development factor for case outstanding method #2\n(ReptCDF−1)(PaidCDF)\nCase O/S Dev Factor = 1 +\nPaidCDF−ReptCDF\nUnpaidClaims\nCase O/S Dev Factor =\nCaseOutstanding",
+      "tags": []
+    },
+    {
+      "id": "Reserving-52",
+      "deck": "Reserving",
+      "card_number": 52,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "2 ways to deal with operational changes when",
+      "back": "2 ways to deal with operational changes when estimating unpaid claims\n1. Using data selection and rearrangement to isolate or\nneutralize the impact of the changes\n2. Using data adjustment to restate historical data as if the\nchanges never occurred",
+      "tags": []
+    },
+    {
+      "id": "Reserving-53",
+      "deck": "Reserving",
+      "card_number": 53,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "Examples of using data selection and rearrangement",
+      "back": "Examples of using data selection and rearrangement to address operational\nchanges\n• Using earned exposures instead of claim counts when the\ndefinition of claim counts has changed.\n• Using policy year data instead of accident year data when\npolicy limits have significantly changed between policy\nyears.\n• Using report year data instead of accident year data when\nsocial or legal climate changes cause severity to correlate\ncloser with report date than accident date.\n• Using shorter time periods when the average accident date\nhas changed over time.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-54",
+      "deck": "Reserving",
+      "card_number": 54,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "When subdividing triangles by size of loss would be",
+      "back": "When subdividing triangles by size of loss would be useful\nIf there was a shift in emphasis in the claims department\nbetween handling small versus large claims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-55",
+      "deck": "Reserving",
+      "card_number": 55,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "Purpose of Berquist-Sherman techniques",
+      "back": "The Berquist-Sherman techniques can be used to adjust\ntriangles for changes in claim settlement rates and/or case\nreserve adequacy. After the adjustments, all years in the\nadjusted triangles will have the same settlement rates and/or\ncase reserve adequacy so the regular development methods\ncan then be used on the adjusted triangles to produce\nestimates.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-56",
+      "deck": "Reserving",
+      "card_number": 56,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "Assumptions of the paid B-S technique",
+      "back": "1. Changes in disposal rates are due to speedups or\nslowdowns in settlement rates.\n2. Higher disposal rates are associated with a higher\npercentage of ultimate paid claims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-57",
+      "deck": "Reserving",
+      "card_number": 57,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "Assumption of the reported B-S technique",
+      "back": "Any differences between the annual changes in average case\nreserves at each maturity and the severity trend are due to\nchanges in case reserve adequacy.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-58",
+      "deck": "Reserving",
+      "card_number": 58,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "Challenges in using paid loss data to obtain the",
+      "back": "Challenges in using paid loss data to obtain the severity trend for the\nreported B-S technique\nIt assumes that the average paid severity is only changing\nbecause of the severity trend (and not things like shifts in the\nprioritization between large and small claims).\nAdditionally, for lines like medical malpractice:\n1. Limited paid data at early maturities to calculate paid\nseverity.\n2. Trends can be distorted by irregular settlements and\nvariation in the rate of claims closed without payment.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-59",
+      "deck": "Reserving",
+      "card_number": 59,
+      "section": "G.7. Berquist-Sherman Techniques July 17,2014",
+      "front": "The advantage of using the latest diagonal as the",
+      "back": "The advantage of using the latest diagonal as the common level for B-S\ntechniques\nIt has the advantage that the adjusted paid or reported\ntriangles would have the latest diagonal remain unchanged\nfrom the unadjusted paid or reported triangles.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-60",
+      "deck": "Reserving",
+      "card_number": 60,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "Benefits of using multiple estimation methods rather",
+      "back": "Benefits of using multiple estimation methods rather than a single method to\nestimate unpaid claims\nSeeing multiple estimates can help you better understand the\nrange and distribution of possible outcomes, as well as the\nsensitivity of estimates to varying assumptions.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-61",
+      "deck": "Reserving",
+      "card_number": 61,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "Examples of common diagnostics used to check",
+      "back": "Examples of common diagnostics used to check estimation methods for\nreasonability\nCommon diagnostics to review for reasonability would\ninclude implied ultimate frequencies, severities, claim ratios,\npure premiums, and unpaid severities.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-62",
+      "deck": "Reserving",
+      "card_number": 62,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "2 reasons why unpaid claims estimates should be",
+      "back": "2 reasons why unpaid claims estimates should be reviewed between annual\nanalyses\n1. The unpaid claims estimate should be updated if there has\nbeen a change in exposures.\n2. To see if claims are developing as expected as a diagnostic\ncheck as to whether unpaid claims estimates are reasonable.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-63",
+      "deck": "Reserving",
+      "card_number": 63,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "Different options an actuary can take based on a",
+      "back": "Different options an actuary can take based on a retroactive test if actual\nemergence exceeded expected emergence\n1. Reduce the IBNR. For example, this might be appropriate if\nthere was a speedup in reporting.\n2. Leave the IBNR unchanged. For example, this might be\nappropriate if there was a large reported claim (and you\nthink future development will return to expected levels).\n3. Increase the IBNR. For example, this might be appropriate\nif there was a deterioration in the claim ratio.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-64",
+      "deck": "Reserving",
+      "card_number": 64,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "Formula to calculate expected reported claim",
+      "back": "Formula to calculate expected reported claim emergence\nExpected Reported Claims between t and t + 1 =\n(Estimated Ultimate Claims at t - Cum. Reported Claims at t)\n%Reported -%Reported\n× t+1 t\n1−%Reported\nt",
+      "tags": []
+    },
+    {
+      "id": "Reserving-65",
+      "deck": "Reserving",
+      "card_number": 65,
+      "section": "G.8. Evaluationof Techniques July 21,2014",
+      "front": "Why linear interpolation of development within",
+      "back": "Why linear interpolation of development within quarters is more reasonable\nthan linear interpolation within a year\nBecause development tends to be higher in earlier maturities\nand tends to decrease over time. As such, the linear\ninterpolation assumption is usually not reasonable for\nprolongedperiodsoftime, sincemostofthedevelopmentwill\ntend to occur earlier in the year than later in the year.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-66",
+      "deck": "Reserving",
+      "card_number": 66,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Some ways S&S data availability can vary by insurer",
+      "back": "• Some insurers treat S&S recoveries as negative payments,\nwhile other insurers record S&S recoveries separately.\n• Some insurers capture data for different types of recoveries\nseparately, while others combine all recovery types\ntogether.\n• Some insurers estimate case outstanding amounts for\nrecoveries, while other insurers do not.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-67",
+      "deck": "Reserving",
+      "card_number": 67,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Two ways to estimate S&S recoverables",
+      "back": "1. Use the development technique (or one of the other\npreviously discussed techniques) on a S&S triangle directly.\nThis may work better for salvage than subrogation, since\nsalvage is related to property coverage and develops\nquickly, while subrogation is mostly related to liability\ncoverage and takes longer to develop.\n2. Use a ratio approach that develops ratios of S&S to gross\nclaims, and use those ratios along with ultimate claim\nestimates to project ultimate S&S.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-68",
+      "deck": "Reserving",
+      "card_number": 68,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Two advantages of using the ratio approach to",
+      "back": "Two advantages of using the ratio approach to estimate S&S recoverables\n1. The development factors for the ratio approach tend to\nbe less leveraged than the development factors based on\nreceived S&S dollars.\n2. The ratio approach produces ratios of ultimate S&S to\nultimate claims, which can be used as a diagnostic. If a ratio\nfor a particular year seems unreasonable, a more reasonable\nS&S ratio can be selected for that year.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-69",
+      "deck": "Reserving",
+      "card_number": 69,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Considerations for whether to develop gross and",
+      "back": "Considerations for whether to develop gross and ceded losses separately\nrather than developing net of reinsurance losses directly\n• Data availability\n• Characteristics of the reinsurance program\n• The actuary’s personal preferences",
+      "tags": []
+    },
+    {
+      "id": "Reserving-70",
+      "deck": "Reserving",
+      "card_number": 70,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Formula for ceded and net losses for Quota Share and",
+      "back": "Formula for ceded and net losses for Quota Share and XOL treaties\nQuota Share Ceded = Ceded % × Gross Loss\nXOL Ceded = max[$0, min[XOL Limit, Gross Loss - XOL\nRetention]]\nNet Loss = Gross Loss - Ceded Loss",
+      "tags": []
+    },
+    {
+      "id": "Reserving-71",
+      "deck": "Reserving",
+      "card_number": 71,
+      "section": "H.1. Recoveries July 24,2014",
+      "front": "Relationship between tail factors for gross, ceded, and",
+      "back": "Relationship between tail factors for gross, ceded, and net loss triangles for\nQuota Share and XOL treaties\n• For Quota Share treaties, the tail factors for gross, net, and\nceded triangles will be the same since the net and ceded\ntriangles are just constant multiples of the gross triangle.\n• For Excess of Loss and Stop Loss treaties, the tail factor for\nthe ceded triangle will typically be larger than for the gross\ntriangle since once the retention is hit, all development\noccurs in the ceded layer (at least up to the treaty limit).\nFor the same reason, the tail factor for the net triangle will\ntypically be smaller than for the gross triangle since the net\nlosses may be capped by the reinsurance protection.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-72",
+      "deck": "Reserving",
+      "card_number": 72,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Some ways ALAE data availability can vary by",
+      "back": "Some ways ALAE data availability can vary by insurer\n• Some insurers maintain data for different types of expenses,\nothers combine all expenses into a single ALAE category.\nWhendataforlegalexpensescanbeisolatedfromtherestof\nALAE, it is often preferable to develop this piece separately.\n• Some insurers estimate case outstanding amounts for\nALAE, while other insurers do not.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-73",
+      "deck": "Reserving",
+      "card_number": 73,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Three ways to estimate unpaid ALAE",
+      "back": "1. ALAE can be combined with claims to estimate claims and\nALAE together. However, this may not be a good idea\nif ALAE has a very different development pattern than\nclaims.\n2. Use the development technique (or one of the other\npreviously discussed techniques) on an ALAE triangle\ndirectly.\n3. Use a ratio approach that develops ratios of paid\nALAE-to-paid claims (or reported ALAE-to-reported\nclaims), and use those ratios along with ultimate claim\nestimates to project ultimate ALAE.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-74",
+      "deck": "Reserving",
+      "card_number": 74,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Assumption of using the ratio approach to estimate",
+      "back": "Assumption of using the ratio approach to estimate unpaid ALAE\nThe relationship between ALAE and claims is stable over the\nexperience period.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-75",
+      "deck": "Reserving",
+      "card_number": 75,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Advantages of using the ratio approach to estimate",
+      "back": "Advantages of using the ratio approach to estimate unpaid ALAE\n1. It recognizes the inherent relationship between claims and\nALAE.\n2. The development factors for the ratio approach tend to be\nlessleveragedthanthedevelopmentfactorsbasedonALAE\ndollars.\n3. The ratio approach produces ratios of ultimate ALAE to\nultimate claims, which can be used as a diagnostic. If a ratio\nfor a particular year seems unreasonable, a more reasonable\nALAE ratio can be selected for that year.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-76",
+      "deck": "Reserving",
+      "card_number": 76,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Disadvantages of using the ratio approach to estimate",
+      "back": "Disadvantages of using the ratio approach to estimate unpaid ALAE\n• For some lines of business, there may be claims with no\nclaim payment but have substantial ALAE.\n• An error in the estimation of ultimate claims will lead to an\nerror in the estimation of ultimate ALAE.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-77",
+      "deck": "Reserving",
+      "card_number": 77,
+      "section": "H.2. Estimating ALAE July 25,2014",
+      "front": "Advantage of using additive development instead of",
+      "back": "Advantage of using additive development instead of multiplicative\ndevelopment when developing the paid-to-paid ratios\nThe advantage of the additive approach is that it is more\nstable if the ratios are very small at early maturities.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-78",
+      "deck": "Reserving",
+      "card_number": 78,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Describe how ULAE can be estimated using a market",
+      "back": "Describe how ULAE can be estimated using a market value approach\nWith this approach, the market value of the unpaid ULAE\nwould be equal to the cost that a Third-Party Administrator\n(TPA) would require to take over handling of the book of\nclaims.\nUsing this approach to quantify unpaid ULAE is common\namong self-insurers.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-79",
+      "deck": "Reserving",
+      "card_number": 79,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "One common assumption for dollar-based techniques",
+      "back": "One common assumption for dollar-based techniques to estimate unpaid\nULAE\nOne common assumption of the dollar-based techniques is\nthat ULAE costs track with claim costs in both timing (similar\npayment patterns) and amount. The amount assumption\nimplies that a single $10,000 claim would have the same\nULAE costs as ten $1,000 claims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-80",
+      "deck": "Reserving",
+      "card_number": 80,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Formula for the claims basis for the dollar-based",
+      "back": "Formula for the claims basis for the dollar-based Generalized Approach\nB = [(U × R) + (U × P) + (U × C)]\n1 2 3\n• B = claims basis for the calendar year\n• U = percent of ultimate ULAE spent opening claims\n1\n• U = percent of ultimate ULAE spent maintaining claims\n2\n• U = percent of ultimate ULAE spent closing claims\n3\n• U + U + U = 100%\n1 2 3\n• R = ultimate cost of claims reported in the CY\n• P = paid claims during the calendar year\n• C = ultimate cost of claims closed during the calendar year",
+      "tags": []
+    },
+    {
+      "id": "Reserving-81",
+      "deck": "Reserving",
+      "card_number": 81,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Three ways to estimate unpaid ULAE using the",
+      "back": "Three ways to estimate unpaid ULAE using the generalized approach\n1. Expected Claims approach: Unpaid ULAE = (W ∗ × L) − M\n2. B-F approach: Unpaid ULAE = W ∗ × (L − B)\n3. Development approach: Unpaid ULAE = M × (L/B − 1)",
+      "tags": []
+    },
+    {
+      "id": "Reserving-82",
+      "deck": "Reserving",
+      "card_number": 82,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Key assumptions of the Generalized Approach",
+      "back": "• ULAE costs are proportional to the dollars of claims being\nhandled.\n• ULAE amounts spent opening claims are proportional to\nthe ultimate cost of claims being reported.\n• ULAE amounts spent maintaining claims are proportional\nto payments made.\n• ULAE amounts spent closing claims are proportional to the\nultimate cost of claims being closed.\nFurthermore, the generalized approach also assumes that\nthere is no cost to re-open or re-close claims.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-83",
+      "deck": "Reserving",
+      "card_number": 83,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "One weakness of the generalized approach",
+      "back": "It does not account for the case when ULAE inflation is\noccurring at a different rate than claims inflation.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-84",
+      "deck": "Reserving",
+      "card_number": 84,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Formula for the claims basis and unpaid ULAE for",
+      "back": "Formula for the claims basis and unpaid ULAE for the Simplified\nGeneralized Approach\nB = (U × L) + (U × P)\nest 1 2\nUnpaid ULAE = W ∗ × [Pure IBNR + U × (Case + IBNER)]\n2",
+      "tags": []
+    },
+    {
+      "id": "Reserving-85",
+      "deck": "Reserving",
+      "card_number": 85,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Additional assumptions of the Simplified Generalized",
+      "back": "Additional assumptions of the Simplified Generalized Approach\n• R is approximated using the accident year ultimate claims\nwhen calculating W.\n• That no extra effort is required to close claims, so U = 0.\n3",
+      "tags": []
+    },
+    {
+      "id": "Reserving-86",
+      "deck": "Reserving",
+      "card_number": 86,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Key assumptions of the Classical Approach",
+      "back": "• The ratio of paid ULAE to paid claims is stable and\napproximates the true ULAE to claims ratio.\n• For claims that have occurred, future ULAE costs will be\nproportional to future claims payments.\n• 50% of ULAE is paid when a claim is opened, and 50% of\nULAE is paid when a claim is closed.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-87",
+      "deck": "Reserving",
+      "card_number": 87,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "When the Classical Approach does not work well",
+      "back": "The classical approach does not work well for long-tail\nlines of business, in times when ULAE inflation rates differ\nfrom claims inflation rates, when the insurer is significantly\ngrowing or shrinking, or when the 50/50 assumption is not\nappropriate.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-88",
+      "deck": "Reserving",
+      "card_number": 88,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Claims basis formula under the Kittel Approach",
+      "back": "B = (50% × CY Incurred Claims) + (50% × P)\nest\nNote that CY Incurred = CY Paid + change in TOTAL reserves\n(including IBNR)",
+      "tags": []
+    },
+    {
+      "id": "Reserving-89",
+      "deck": "Reserving",
+      "card_number": 89,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Unpaid ULAE formula for Classical and Kittel",
+      "back": "Unpaid ULAE formula for Classical and Kittel approaches\nUnpaid ULAE = W ∗ × [Pure IBNR + 50% × (Case + IBNER)]",
+      "tags": []
+    },
+    {
+      "id": "Reserving-90",
+      "deck": "Reserving",
+      "card_number": 90,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "How the Kittel Approach is an improvement over the",
+      "back": "How the Kittel Approach is an improvement over the Classical Approach\nThe Kittel approach is an improvement over the classical\napproach when the book of business is growing or shrinking\nand for longer tailed lines of business. This is because when\nan insurer grows, ULAE tends to increase quickly, but the\nclaims from the additional exposures may not be paid for\nmany years (resulting in higher paid ULAE-to-paid claim\nratios). However, the reserves will start increasing sooner, so\nincluding incurred claims will reduce this distortion.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-91",
+      "deck": "Reserving",
+      "card_number": 91,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "When the Kittel Approach does not work well",
+      "back": "When the 50/50 assumption is not appropriate or when\nULAE inflation rates differ from claims inflation rates.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-92",
+      "deck": "Reserving",
+      "card_number": 92,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "How the Mango-Allen Approach differs from the",
+      "back": "How the Mango-Allen Approach differs from the Classical Approach\nThe only difference between the Mango-Allen approach and\nthe classical approach is that expected paid claims are used\ninstead of actual paid claims when estimating the claims\nbasis for each year.\nThe Mango-Allen approach is useful when insurers have\nlimited or volatile calendar year paid claims. However, for\nlarger companies with more stable actual paid claims, the\nextra effort to estimate the expected paid claims may not be\njustified.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-93",
+      "deck": "Reserving",
+      "card_number": 93,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Reasons for the development of the Generalized",
+      "back": "Reasons for the development of the Generalized Approach\n• Recognize an insurer’s rapid growth\n• Be consistent with the insurer’s ULAE expenditures over\nthe life of a claim\n• Reproduce key concepts underlying the Wendy Johnson\ntechnique\n• Use commonly available and reliable aggregate payment\nand unpaid claims data\n• Allow for alternatives to the 50/50 rule.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-94",
+      "deck": "Reserving",
+      "card_number": 94,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Two issues in dollar-based techniques that are",
+      "back": "Two issues in dollar-based techniques that are addressed by count-based\ntechniques\n1. That ULAE is not directly proportional to claims (e.g., the\nULAE for a single $10,000 claim would be less than the\nULAE for ten $1,000 claims.)\n2. That using ULAE-to-claims ratios results in volatile ULAE\nwhen claims are volatile.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-95",
+      "deck": "Reserving",
+      "card_number": 95,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Key assumption of and challenge with count-based",
+      "back": "Key assumption of and challenge with count-based techniques\nA key assumption of count-based techniques is that the same\nkind of transaction costs the same ULAE regardless of claim\nsize.\nA challenge with count-based techniques is obtaining\naccurate and consistent claim count data.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-96",
+      "deck": "Reserving",
+      "card_number": 96,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Briefly discuss the Brian technique",
+      "back": "Brian assumed that ULAE would be split into 5 types of\ntransactions: opening claims, maintaining open claims,\nmaking payments, closing claims, and reopening claims.\nBrian then assumed that the ULAE costs for each of these\ntypes of transactions was similar, and could be estimated\nusing historical ratios of ULAE to number of transactions.\nOne weakness of this technique is the assumption that all\ntransaction types require similar ULAE. A second more\nimportant weakness is the difficulty in estimating the number\nof future transactions as well as the average cost per\ntransaction.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-97",
+      "deck": "Reserving",
+      "card_number": 97,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Briefly discuss the Johnson technique",
+      "back": "Wendy Johnson assumed ULAE could be split into 2 types\nof transactions: opening claims and maintaining claims.\nJohnson then assumed that the ULAE costs for each of these\ntypes of transactions could be estimated using historical\nratios of ULAE to number of transactions. However, unlike\nBrian, Johnson allowed the costs per transactions to vary for\nthe different transaction types.\nOne benefit of Johnson’s approach was that only the relative\nULAE per transaction type was needed instead of the actual\nULAE.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-98",
+      "deck": "Reserving",
+      "card_number": 98,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Briefly discuss the Mango-Allen Claim Staffing",
+      "back": "Briefly discuss the Mango-Allen Claim Staffing Technique\nMango-Allen first calculated a new count base as Opened\nclaim counts + Closed claim counts + Pending (ending) open\nclaim counts (OCP). They calculated the workload for claims\nadjusters as OCP counts per adjuster, and projected OCP\ncounts and divided by this workload (with any anticipated\nadjustments) to get the projected number of claims adjusters.\nFinally, they multiplied the projected number of adjusters by\nthe trended historical ULAE per claims adjuster to get the\nULAE reserve.\nOne concern with this approach is that the ULAE reserve\nestimates are sensitive to the magnitude of the selected\nparameters.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-99",
+      "deck": "Reserving",
+      "card_number": 99,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Briefly discuss the Spalla approach",
+      "back": "Spalla suggests that modern computer systems can now track\nthe time spent on individual claims by each claims employee.\nThis can be used to calculate the average ULAE per type\nof transaction at different stages in a claim’s duration, and\nthese can be loaded for other ULAE costs (e.g., overhead).\nAlternatively, instead of calculating the absolute cost per\ntransaction, a relative cost per transaction could also be\ncalculated.",
+      "tags": []
+    },
+    {
+      "id": "Reserving-100",
+      "deck": "Reserving",
+      "card_number": 100,
+      "section": "H.3. Estimating ULAE February 12,2020",
+      "front": "Formulas for the Generalized Approach for counts",
+      "back": "M = w × b = w × [(v × r) + (v × o) + (v × c)]\n1 2 3\nUnpaid ULAE = ∑w ∗ × [(v × r ) + (v × o ) + (v × c )]\ni 1 i 2 i 3 i\ni",
+      "tags": []
+    }
+  ]
+}
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
